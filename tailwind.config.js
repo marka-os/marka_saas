@@ -1,105 +1,76 @@
 /** @type {import('tailwindcss').Config} */
+
 export default {
   darkMode: ["class"],
-  content: [
-    './pages/**/*.{js,jsx}',
-    './components/**/*.{js,jsx}',
-    './app/**/*.{js,jsx}',
-    './src/**/*.{js,jsx}',
-  ],
-  prefix: "",
+  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
-      colors: {
-        border: "var(--color-border)", /* slate-200 */
-        input: "var(--color-input)", /* white */
-        ring: "var(--color-ring)", /* blue-800 */
-        background: "var(--color-background)", /* slate-50 */
-        foreground: "var(--color-foreground)", /* slate-900 */
-        primary: {
-          DEFAULT: "var(--color-primary)", /* blue-800 */
-          foreground: "var(--color-primary-foreground)", /* white */
-        },
-        secondary: {
-          DEFAULT: "var(--color-secondary)", /* slate-500 */
-          foreground: "var(--color-secondary-foreground)", /* white */
-        },
-        destructive: {
-          DEFAULT: "var(--color-destructive)", /* red-600 */
-          foreground: "var(--color-destructive-foreground)", /* white */
-        },
-        muted: {
-          DEFAULT: "var(--color-muted)", /* slate-100 */
-          foreground: "var(--color-muted-foreground)", /* slate-600 */
-        },
-        accent: {
-          DEFAULT: "var(--color-accent)", /* amber-500 */
-          foreground: "var(--color-accent-foreground)", /* slate-900 */
-        },
-        popover: {
-          DEFAULT: "var(--color-popover)", /* white */
-          foreground: "var(--color-popover-foreground)", /* slate-900 */
-        },
-        card: {
-          DEFAULT: "var(--color-card)", /* white */
-          foreground: "var(--color-card-foreground)", /* slate-900 */
-        },
-        success: {
-          DEFAULT: "var(--color-success)", /* emerald-600 */
-          foreground: "var(--color-success-foreground)", /* white */
-        },
-        warning: {
-          DEFAULT: "var(--color-warning)", /* amber-600 */
-          foreground: "var(--color-warning-foreground)", /* white */
-        },
-        error: {
-          DEFAULT: "var(--color-error)", /* red-600 */
-          foreground: "var(--color-error-foreground)", /* white */
-        },
-      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+        },
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        chart: {
+          1: "var(--chart-1)",
+          2: "var(--chart-2)",
+          3: "var(--chart-3)",
+          4: "var(--chart-4)",
+          5: "var(--chart-5)",
+        },
+        sidebar: {
+          DEFAULT: "var(--sidebar)",
+          foreground: "var(--sidebar-foreground)",
+          primary: "var(--sidebar-primary)",
+          "primary-foreground": "var(--sidebar-primary-foreground)",
+          accent: "var(--sidebar-accent)",
+          "accent-foreground": "var(--sidebar-accent-foreground)",
+          border: "var(--sidebar-border)",
+          ring: "var(--sidebar-ring)",
+        },
+      },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-      },
-      fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-        '2xl': ['1.5rem', { lineHeight: '2rem' }],
-        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
-      },
-      fontWeight: {
-        normal: '400',
-        medium: '500',
-        semibold: '600',
-      },
-      boxShadow: {
-        'card': '0 1px 3px rgba(0, 0, 0, 0.1)',
-        'modal': '0 4px 6px rgba(0, 0, 0, 0.1)',
-        'elevation-1': '0 1px 3px rgba(0, 0, 0, 0.1)',
-        'elevation-2': '0 4px 6px rgba(0, 0, 0, 0.1)',
-        'elevation-3': '0 10px 15px rgba(0, 0, 0, 0.1)',
+        sans: ["var(--font-sans)"],
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.2s ease-out",
-        "slide-in": "slide-in 0.3s ease-in-out",
+        "fade-in": "fadeIn 0.5s ease-in",
+        "slide-in-right": "slideInRight 0.6s ease-out",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       keyframes: {
         "accordion-down": {
@@ -110,28 +81,26 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
+        fadeIn: {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
-        "slide-in": {
-          from: { transform: "translateX(-100%)" },
-          to: { transform: "translateX(0)" },
+        slideInRight: {
+          from: { opacity: "0", transform: "translateX(50px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
         },
+      },
+      screens: {
+        xs: "475px",
+      },
+      backdropBlur: {
+        xs: "2px",
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-      },
-      zIndex: {
-        '900': '900',
-        '1000': '1000',
-        '1100': '1100',
-        '1200': '1200',
+        18: "4.5rem",
+        88: "22rem",
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-  ],
-}
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+};

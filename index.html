@@ -1,19 +1,84 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1"
+    />
+    <title>Marka | UNEB-Compliant Report Card SaaS for Ugandan Schools</title>
 
-<head>
-  <meta charset="utf-8" />
-  <title>Marka</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#000000" />
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="manifest" href="/manifest.json" />
-</head>
+    <!-- Primary Meta Tags -->
+    <meta
+      name="description"
+      content="Transform Uganda's education with digital report cards. UNEB-compliant report card generation system designed specifically for Ugandan schools."
+    />
+    <meta
+      name="keywords"
+      content="Marka, UNEB, Report Card, SaaS, Uganda, Schools, Digital Report Cards, Education Technology"
+    />
+    <meta name="author" content="Kasim Lyee (lyee@codewithlyee.com)" />
 
-<body>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div class="dhiwise-code" id="root"></div>
-  <script type="module" src="/src/index.jsx"></script>
-</body>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#F7C52D" />
+
+    <!-- Open Graph -->
+    <meta
+      property="og:title"
+      content="Marka - UNEB-Compliant Report Card SaaS"
+    />
+    <meta
+      property="og:description"
+      content="Transform Uganda's education with digital report cards. UNEB-compliant report card generation system designed specifically for Ugandan schools."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.jpg" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Marka - UNEB-Compliant Report Card SaaS"
+    />
+    <meta
+      name="twitter:description"
+      content="Transform Uganda's education with digital report cards. UNEB-compliant report card generation system designed specifically for Ugandan schools."
+    />
+    <meta name="twitter:image" content="/og-image.jpg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((registration) => {
+              console.log("SW registered: ", registration);
+              // Check for service worker updates
+              registration.update();
+            })
+            .catch((registrationError) => {
+              console.log("SW registration failed: ", registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
 </html>
