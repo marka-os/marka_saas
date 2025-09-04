@@ -13,7 +13,7 @@ import Dashboard from "./pages/dashboard";
 import Students from "./pages/students";
 import Schools from "./pages/schools";
 import Subjects from "./pages/subjects";
-import Assessments from "./pages/assessments";
+//import Assessments from "./pages/assessments";
 import Reports from "./pages/reports";
 import Analytics from "./pages/analytics";
 import NotFound from "./pages/not-found";
@@ -50,7 +50,6 @@ function Router() {
           <Route path="/students" component={Students} />
           <Route path="/schools" component={Schools} />
           <Route path="/subjects" component={Subjects} />
-          <Route path="/assessments" component={Assessments} />
           <Route path="/reports" component={Reports} />
           <Route path="/analytics" component={Analytics} />
           <Route component={NotFound} />
