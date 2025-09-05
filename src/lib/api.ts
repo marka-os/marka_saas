@@ -28,6 +28,8 @@ export async function login(credentials: LoginDto) {
  * @returns The user data.
  */
 export async function register(userData: RegisterDto) {
+  const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL?.replace(/\/$/, "");
+  console.log("Using API base URL:", BASE_URL);
   const response = await apiRequest("POST", "/api/v1/auth/register", userData);
   return response.json();
 }
@@ -82,7 +84,7 @@ export async function createStudent(student: InsertStudent) {
 
 //export async function updateStudent(id: string, updates: UpdateStudent) {
 //  const response = await apiRequest("PATCH", `/api/v1/students/${id}`, updates);
-  //return response.json();
+//return response.json();
 //}
 
 export async function deleteStudent(id: string) {
@@ -132,8 +134,8 @@ export async function createSchool(school: InsertSchool) {
 }
 
 export async function updateSchool(id: string, updates: any) {
-const response = await apiRequest("PATCH", `/api/v1/schools/${id}`, updates);
-return response.json();
+  const response = await apiRequest("PATCH", `/api/v1/schools/${id}`, updates);
+  return response.json();
 }
 
 export async function deleteSchool(id: string) {
@@ -181,14 +183,14 @@ export async function getAssessments(
 
 export async function createAssessment(assessment: InsertAssessment) {
   const response = await apiRequest("POST", "/api/v1/assessments", assessment);
-    return response.json();
+  return response.json();
 }
 
 export async function updateAssessment(id: string, updates: UpdateAssessment) {
   const response = await apiRequest(
     "PUT",
-  `/api/v1/assessments/${id}`,
-  updates
+    `/api/v1/assessments/${id}`,
+    updates
   );
   return response.json();
 }

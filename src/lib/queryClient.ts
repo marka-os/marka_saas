@@ -13,50 +13,64 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Use the deployed API URL from environment variables
+const BASE_URL =
+  import.meta.env.VITE_APP_API_BASE_URL?.replace(/\/$/, "") ||
+  "https://api.marka.codewithlyee.com/api/v1";
+
 /**
  * Make an API request to the specified URL with the given method and data.
- * The request is made with the currently stored access token, if any.
- * The response is checked for OK status, and an error is thrown if it is not.
- * @param method The HTTP method to use.
- * @param url The URL to request.
- * @param data The data to send in the request body.
- * @returns The response.
- * @throws An error if the response is not OK.
  */
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined
 ): Promise<Response> {
+  console.log("Using API base URL:", BASE_URL);
   const token = useAuthStore.getState().token;
-  const res = await fetch(url, {
-    method,
-    headers: {
-      ...(data ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
 
-  //Auto-logout on 401
-  if (res.status === 401) {
-    useAuthStore.getState().logout();
+  // Ensure proper URL construction
+  const cleanUrl = url.startsWith("/") ? url.slice(1) : url;
+  const fullUrl = `${BASE_URL}/${cleanUrl}`;
+
+  console.log("Making request to:", fullUrl);
+  console.log("Request method:", method);
+  console.log("Request data:", data);
+
+  try {
+    const res = await fetch(fullUrl, {
+      method,
+      headers: {
+        ...(data ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        // Add CORS headers if needed for your deployed API
+        Accept: "application/json",
+      },
+      body: data ? JSON.stringify(data) : undefined,
+      // Remove credentials: "include" if your API doesn't support it
+      mode: "cors",
+    });
+
+    console.log("Response status:", res.status);
+    console.log("Response headers:", Object.fromEntries(res.headers.entries()));
+
+    // Only auto-logout on 401 if we're not on the registration/login endpoints
+    if (res.status === 401 && !url.includes("/auth/")) {
+      useAuthStore.getState().logout();
+    }
+
+    await throwIfResNotOk(res);
+    return res;
+  } catch (error) {
+    console.error("API Request failed:", error);
+    console.error("Full URL was:", fullUrl);
+    throw error;
   }
-
-  await throwIfResNotOk(res);
-  return res;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 /**
  * Create a query function that can be used with React Query.
- *
- * @param options.on401 The behavior when the API returns a 401 Unauthorized
- *                      response.
- *                      - "returnNull": Return null as the result of the query.
- *                      - "throw": Throw an error.
- * @returns A query function that can be used with React Query.
  */
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
@@ -64,23 +78,35 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const token = useAuthStore.getState().token;
-    const url = queryKey.join("/");
-    const res = await fetch(url, {
-        headers: token ? {'Authorization': `Bearer ${token}`} : {},
-      credentials: "include",
-    });
+    const url = `${BASE_URL}/${queryKey.join("/")}`;
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    try {
+      const res = await fetch(url, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Accept: "application/json",
+        },
+        mode: "cors",
+      });
+
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      // Only auto-logout on 401 if we're not on auth endpoints
+      if (
+        res.status === 401 &&
+        !queryKey.some((key) => String(key).includes("auth"))
+      ) {
+        useAuthStore.getState().logout();
+      }
+
+      await throwIfResNotOk(res);
+      return await res.json();
+    } catch (error) {
+      console.error("Query failed for:", queryKey, error);
+      throw error;
     }
-
-    //Auto-logout on 401
-    if (res.status === 401) {
-      useAuthStore.getState().logout();
-    }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({

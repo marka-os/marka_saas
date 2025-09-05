@@ -20,6 +20,7 @@ import NotFound from "./pages/not-found";
 
 import { useEffect } from "react";
 
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
