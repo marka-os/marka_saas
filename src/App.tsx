@@ -20,7 +20,6 @@ import NotFound from "./pages/not-found";
 
 import { useEffect } from "react";
 
-
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -42,7 +41,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
-          <Route component={Landing} />
+          {/* <Route component={Landing} /> */}
         </>
       ) : (
         <>
