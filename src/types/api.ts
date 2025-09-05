@@ -8,11 +8,12 @@ export interface LoginDto {
 
 export interface RegisterDto {
   email: string;
+  phone: string;
   password: string;
   firstName: string;
   lastName: string;
-  role?: UserRole;
-  plan?: Plan;
+  role: UserRole;
+  plan: Plan;
 }
 
 export interface User {

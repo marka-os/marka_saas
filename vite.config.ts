@@ -6,19 +6,12 @@ import { resolve } from "path";
 export default defineConfig({
   plugins: [react()],
  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    hmr: {
-      // Use the Codespaces URL for WebSocket connection
-      clientPort: process.env.CODESPACE_NAME ? 443 : 5173,
-      host: process.env.CODESPACE_NAME 
-        ? `${process.env.CODESPACE_NAME}-5173.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`
-        : 'localhost'
-    }
-  },
-  define: {
-    // Fix for some build issues in Codespaces
-    global: 'globalThis',
+    allowedHosts: [
+      '5173-kasimlyee-markasaas-c7oscy880wj.ws-eu121.gitpod.io', // Specific Gitpod host
+    ],
+    host: true, // Listen on all network interfaces
+    port: 5173, // Default Vite port
+    strictPort: true, // Fail if port is in use
   },
   resolve: {
     alias: {
