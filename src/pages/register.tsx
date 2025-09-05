@@ -28,6 +28,7 @@ import {
 import { Checkbox } from "@marka/components/ui/checkbox";
 import { useToast } from "@marka/hooks/use-toast";
 import { register as registerApi } from "@marka/lib/api";
+import { PlanModal } from "@marka/components/modals/PlansModal";
 
 const registerSchema = z
   .object({
@@ -91,12 +92,30 @@ export default function Register() {
 
   const registerMutation = useMutation({
     mutationFn: registerApi,
-    onSuccess: () => {
-      toast({
-        title: "Account created successfully!",
-        description: "You can now sign in with your new account.",
-      });
-      setLocation("/login");
+    onSuccess: (response) => {
+      if (response.emailVerificationToken && response.phoneVerificationToken) {
+        // Store verification data
+        const verificationData = {
+          userId: response.user.id,
+          emailToken: response.emailVerificationToken,
+          phoneToken: response.phoneVerificationToken,
+          email: response.user.email,
+          phone: response.user.phone,
+        };
+        localStorage.setItem(
+          "verificationData",
+          JSON.stringify(verificationData)
+        );
+
+        // Redirect to verification page
+        setLocation("/verify");
+      } else {
+        toast({
+          title: "Account created successfully!",
+          description: "You can now sign in with your new account.",
+        });
+        setLocation("/login");
+      }
     },
     onError: (error: unknown) => {
       let message = "Something went wrong. Please try again.";
@@ -277,6 +296,18 @@ export default function Register() {
                             <SelectItem value="teacher">Teacher</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="plan"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Plan</FormLabel>
+                        <PlanModal />
                         <FormMessage />
                       </FormItem>
                     )}

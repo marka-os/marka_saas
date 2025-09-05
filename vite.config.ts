@@ -5,13 +5,16 @@ import { resolve } from "path";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
- server: {
+  server: {
     allowedHosts: [
-      '5173-kasimlyee-markasaas-c7oscy880wj.ws-eu121.gitpod.io', // Specific Gitpod host
+      "5173-kasimlyee-markasaas-c7oscy880wj.ws-eu121.gitpod.io", // Specific Gitpod host
     ],
     host: true, // Listen on all network interfaces
     port: 5173, // Default Vite port
     strictPort: true, // Fail if port is in use
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "react/jsx-runtime"],
   },
   resolve: {
     alias: {
@@ -27,5 +30,6 @@ export default defineConfig({
       "@marka/pages": resolve(__dirname, "./src/pages"),
       "@marka/api": resolve(__dirname, "./src/api"),
     },
+    dedupe: ["react", "react-dom"],
   },
 });

@@ -19,6 +19,7 @@ import Analytics from "./pages/analytics";
 import NotFound from "./pages/not-found";
 
 import { useEffect } from "react";
+import VerificationPage from "./pages/verificationPage";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,6 +42,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
+          <Route path="/verify" component={VerificationPage}/>
           {/* <Route component={Landing} /> */}
         </>
       ) : (

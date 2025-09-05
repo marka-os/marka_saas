@@ -208,3 +208,46 @@ export async function calculateGrade(score: number, examLevel: string) {
   );
   return response.json();
 }
+
+// lib/api.ts
+export const verifyEmail = async (
+  userId: string,
+  token: string,
+  code: string
+) => {
+  const response = await fetch("/api/auth/verify/email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, token, code }),
+  });
+  if (!response.ok) throw new Error("Failed to verify email");
+  return response.json();
+};
+
+export const verifyPhone = async (
+  userId: string,
+  token: string,
+  code: string
+) => {
+  const response = await fetch("/api/auth/verify/phone", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, token, code }),
+  });
+  if (!response.ok) throw new Error("Failed to verify phone");
+  return response.json();
+};
+
+export const resendVerificationCode = async (
+  userId: string,
+  type: string,
+  token: string
+) => {
+  const response = await fetch("/api/auth/verify/resend", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, type, token }),
+  });
+  if (!response.ok) throw new Error("Failed to resend code");
+  return response.json();
+};
