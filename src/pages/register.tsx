@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, GraduationCap, ArrowLeft } from "lucide-react";
+import { parsePhoneNumber } from "libphonenumber-js";
 
 import { Button } from "@marka/components/ui/button";
 import { Card, CardContent } from "@marka/components/ui/card";
@@ -33,6 +34,20 @@ const registerSchema = z
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Please enter a valid email address"),
+    phone: z
+      .string()
+      .min(1, { message: "Phone number is required" })
+      .refine(
+        (value) => {
+          try {
+            const phoneNumber = parsePhoneNumber(value, "UG");
+            return phoneNumber.isValid();
+          } catch {
+            return false;
+          }
+        },
+        { message: "Invalid phone number" }
+      ),
     role: z.enum(["admin", "teacher"], {
       required_error: "Please select a role",
     }),
@@ -44,6 +59,7 @@ const registerSchema = z
         (val) => val === true,
         "You must accept the terms and conditions"
       ),
+    plan: z.enum(["standard", "pro", "enterprise"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -64,7 +80,9 @@ export default function Register() {
       firstName: "",
       lastName: "",
       email: "",
+      phone: "",
       role: undefined,
+      plan: undefined,
       password: "",
       confirmPassword: "",
       terms: false,
@@ -103,8 +121,10 @@ export default function Register() {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
+      phone: data.phone,
       password: data.password,
       role: data.role,
+      plan: data.plan,
     });
   };
 
@@ -208,6 +228,25 @@ export default function Register() {
                             type="email"
                             placeholder="Enter your email"
                             data-testid="email-input"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            placeholder="+256700000000"
+                            data-testid="phone-input"
                             {...field}
                           />
                         </FormControl>
