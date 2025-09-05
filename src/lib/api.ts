@@ -6,7 +6,7 @@ import {
   InsertStudent,
   InsertAssessment,
   UpdateAssessment,
-  // UpdateStudent,
+  UpdateStudent,
   //UpdateSchool,
 } from "@marka/types/api";
 
@@ -82,10 +82,10 @@ export async function createStudent(student: InsertStudent) {
   return response.json();
 }
 
-//export async function updateStudent(id: string, updates: UpdateStudent) {
-//  const response = await apiRequest("PATCH", `/api/v1/students/${id}`, updates);
-//return response.json();
-//}
+export async function updateStudent(id: string, updates: UpdateStudent) {
+  const response = await apiRequest("PATCH", `/api/v1/students/${id}`, updates);
+  return response.json();
+}
 
 export async function deleteStudent(id: string) {
   const response = await apiRequest("DELETE", `/api/v1/students/${id}`);
@@ -152,15 +152,15 @@ export async function getSubjects(examLevel: string) {
   return response.json();
 }
 
-//export async function createSubject(subject: any) {
-//  const response = await apiRequest("POST", "/api/v1/subjects", subject);
-//  return response.json();
-//}
+export async function createSubject(subject: any) {
+  const response = await apiRequest("POST", "/api/v1/subjects", subject);
+  return response.json();
+}
 
-//export async function updateSubject(id: string, updates: any) {
-//const response = await apiRequest("PATCH", `/api/v1/subjects/${id}`, updates);
-//  return response.json();
-//}
+export async function updateSubject(id: string, updates: any) {
+  const response = await apiRequest("PATCH", `/api/v1/subjects/${id}`, updates);
+  return response.json();
+}
 
 export async function deleteSubject(id: string) {
   const response = await apiRequest("DELETE", `/api/v1/subjects/${id}`);
@@ -209,7 +209,6 @@ export async function calculateGrade(score: number, examLevel: string) {
   return response.json();
 }
 
-// lib/api.ts
 export const verifyEmail = async (
   userId: string,
   token: string,
