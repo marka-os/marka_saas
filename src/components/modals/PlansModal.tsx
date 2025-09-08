@@ -13,13 +13,16 @@ import {
   CardTitle,
 } from "@marka/components/ui/card";
 import { useFormContext } from "react-hook-form";
-import { Check, Crown, Zap, Building, Sparkles } from "lucide-react";
+import { Check, Crown, Zap, Building, Sparkles, X } from "lucide-react";
+import { useState } from "react";
 
 const plans = [
   {
     id: "standard",
     name: "Standard",
     icon: Zap,
+    price: "95,000",
+    period: "termly",
     description: "Perfect for small schools and individual educators",
     features: [
       "Up to 200 students",
@@ -37,6 +40,8 @@ const plans = [
     id: "pro",
     name: "Pro",
     icon: Crown,
+    price: "190,000",
+    period: "termly",
     description: "Ideal for growing institutions with more needs",
     features: [
       "Up to 500 students",
@@ -54,6 +59,8 @@ const plans = [
     id: "enterprise",
     name: "Enterprise",
     icon: Building,
+    price: "380,000",
+    period: "termly",
     description: "For large institutions with extensive requirements",
     features: [
       "Up to 2000 students",
@@ -71,6 +78,8 @@ const plans = [
     id: "custom",
     name: "Custom",
     icon: Sparkles,
+    price: "Custom",
+    period: "",
     description: "Tailored solutions for unique requirements",
     features: ["Tailored to your needs", "Available upon request (via call)"],
     highlight: false,
@@ -80,13 +89,21 @@ const plans = [
 export function PlanModal() {
   const { setValue, watch } = useFormContext();
   const selectedPlan = watch("plan");
+  const [open, setOpen] = useState(false);
 
   const handleSelect = (planId: string) => {
     setValue("plan", planId, { shouldValidate: true });
   };
 
+  const handleConfirm = () => {
+    if (!selectedPlan) {
+      setValue("plan", "standard", { shouldValidate: true });
+    }
+    setOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           type="button"
@@ -105,18 +122,28 @@ export function PlanModal() {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-6xl p-0 overflow-hidden animate-fade-in">
-        <DialogHeader className="px-6 pt-6 pb-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-b">
-          <DialogTitle className="text-center text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Choose Your Plan
-          </DialogTitle>
-          <p className="text-center text-muted-foreground mt-2">
+      <DialogContent className="max-w-6xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-b sticky top-0 bg-background z-10">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl sm:text-3xl font-bold text-foreground">
+              Choose Your Plan
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(false)}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
             Select the plan that best fits your institution's needs
           </p>
         </DialogHeader>
 
-        <div className="px-6 py-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="px-4 sm:px-6 py-4">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => {
               const IconComponent = plan.icon;
               return (
@@ -126,18 +153,18 @@ export function PlanModal() {
                     ${
                       selectedPlan === plan.id
                         ? "ring-2 ring-primary shadow-lg border-primary"
-                        : "border-border/70 hover:border-primary/50 hover:shadow-md"
+                        : "border-border hover:border-primary/50 hover:shadow-md"
                     }
                     ${
                       plan.highlight
-                        ? "border-primary/30 ring-1 ring-primary/20 shadow-md"
+                        ? "border-primary/50 ring-2 ring-primary/20 shadow-md"
                         : ""
                     }
                   `}
                   onClick={() => handleSelect(plan.id)}
                 >
                   {plan.highlight && (
-                    <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs font-medium py-1 text-center">
+                    <div className="absolute top-0 left-0 right-0 bg-primary text-primary-foreground text-xs font-medium py-1 text-center">
                       Most Popular
                     </div>
                   )}
@@ -150,31 +177,41 @@ export function PlanModal() {
                         className={`p-2 rounded-full mb-3 
                         ${
                           plan.id === "standard"
-                            ? "bg-blue-100 text-blue-600"
+                            ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-200"
                             : ""
                         }
                         ${
                           plan.id === "pro"
-                            ? "bg-purple-100 text-purple-600"
+                            ? "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-200"
                             : ""
                         }
                         ${
                           plan.id === "enterprise"
-                            ? "bg-amber-100 text-amber-600"
+                            ? "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-200"
                             : ""
                         }
                         ${
                           plan.id === "custom"
-                            ? "bg-green-100 text-green-600"
+                            ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-200"
                             : ""
                         }
                       `}
                       >
                         <IconComponent size={20} />
                       </div>
-                      <CardTitle className="text-lg font-semibold text-center">
+                      <CardTitle className="text-lg font-semibold text-center text-foreground">
                         {plan.name}
                       </CardTitle>
+                      <div className="mt-2 text-center">
+                        <span className="text-2xl font-bold text-foreground">
+                          {plan.price}
+                          {plan.period && (
+                            <span className="text-sm font-normal text-muted-foreground">
+                              /{plan.period}
+                            </span>
+                          )}
+                        </span>
+                      </div>
                       <p className="text-xs text-muted-foreground text-center mt-1">
                         {plan.description}
                       </p>
@@ -186,7 +223,9 @@ export function PlanModal() {
                       {plan.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start">
                           <Check className="h-4 w-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                          <span className="text-foreground/80">{feature}</span>
+                          <span className="text-foreground/80 text-xs sm:text-sm">
+                            {feature}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -207,19 +246,16 @@ export function PlanModal() {
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t bg-muted/20 flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="px-4 sm:px-6 py-4 border-t bg-muted/20 flex flex-col sm:flex-row justify-between items-center gap-3 sticky bottom-0 bg-background">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             {selectedPlan
               ? `You've selected the ${selectedPlan} plan`
               : "Please select a plan to continue"}
           </p>
           <Button
             type="button"
-            disabled={!selectedPlan}
-            onClick={() => {
-              if (!selectedPlan) setValue("plan", "standard");
-            }}
-            className="animate-slide-in-right"
+            onClick={handleConfirm}
+            className="w-full sm:w-auto"
           >
             Confirm Selection
           </Button>

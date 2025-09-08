@@ -29,6 +29,7 @@ import { Checkbox } from "@marka/components/ui/checkbox";
 import { useToast } from "@marka/hooks/use-toast";
 import { register as registerApi } from "@marka/lib/api";
 import { PlanModal } from "@marka/components/modals/PlansModal";
+import { useAuthStore } from "@marka/stores/auth-store";
 
 const registerSchema = z
   .object({
@@ -60,7 +61,7 @@ const registerSchema = z
         (val) => val === true,
         "You must accept the terms and conditions"
       ),
-    plan: z.enum(["standard", "pro", "enterprise"]),
+    plan: z.enum(["standard", "pro", "enterprise", "custom"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -74,6 +75,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
+  const { setVerificationData } = useAuthStore();
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -93,29 +95,20 @@ export default function Register() {
   const registerMutation = useMutation({
     mutationFn: registerApi,
     onSuccess: (response) => {
-      if (response.emailVerificationToken && response.phoneVerificationToken) {
-        // Store verification data
-        const verificationData = {
-          userId: response.user.id,
-          emailToken: response.emailVerificationToken,
-          phoneToken: response.phoneVerificationToken,
-          email: response.user.email,
-          phone: response.user.phone,
-        };
-        localStorage.setItem(
-          "verificationData",
-          JSON.stringify(verificationData)
-        );
+      // Store verification data
+      const verificationData = {
+        userId: response.user.id,
+        email: response.user.email,
+        phone: response.user.phone,
+      };
+      setVerificationData(
+        verificationData.userId,
+        verificationData.email,
+        verificationData.phone
+      );
 
-        // Redirect to verification page
-        setLocation("/verify");
-      } else {
-        toast({
-          title: "Account created successfully!",
-          description: "You can now sign in with your new account.",
-        });
-        setLocation("/login");
-      }
+      // Redirect to verification page
+      setLocation("/verify");
     },
     onError: (error: unknown) => {
       let message = "Something went wrong. Please try again.";

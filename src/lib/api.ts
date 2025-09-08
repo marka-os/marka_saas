@@ -211,42 +211,78 @@ export async function calculateGrade(score: number, examLevel: string) {
 
 export const verifyEmail = async (
   userId: string,
-  token: string,
-  code: string
+  code: string,
+  email: string
 ) => {
-  const response = await fetch("/api/auth/verify/email", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, token, code }),
+  const response = await apiRequest("POST", `/api/v1/auth/verify/email`, {
+    userId,
+    code,
+    email,
   });
-  if (!response.ok) throw new Error("Failed to verify email");
+  if (!response.ok) {
+    let errorMsg = "Failed to verify phone";
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody?.message) {
+        errorMsg = errorBody.message;
+      }
+    } catch {}
+
+    throw new Error(errorMsg);
+  }
+
   return response.json();
 };
 
 export const verifyPhone = async (
   userId: string,
-  token: string,
-  code: string
+  code: string,
+  phone: string
 ) => {
-  const response = await fetch("/api/auth/verify/phone", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, token, code }),
+  const response = await apiRequest("POST", `/api/v1/auth/verify/phone`, {
+    userId,
+    code,
+    phone,
   });
-  if (!response.ok) throw new Error("Failed to verify phone");
+  if (!response.ok) {
+    let errorMsg = "Failed to verify phone";
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody?.message) {
+        errorMsg = errorBody.message;
+      }
+    } catch {}
+
+    throw new Error(errorMsg);
+  }
+
   return response.json();
 };
 
 export const resendVerificationCode = async (
   userId: string,
   type: string,
-  token: string
+  target: string
 ) => {
-  const response = await fetch("/api/auth/verify/resend", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, type, token }),
+  const response = await apiRequest("POST", `/api/v1/auth/verify/resend`, {
+    userId,
+    type,
+    target,
   });
-  if (!response.ok) throw new Error("Failed to resend code");
+  if (!response.ok) {
+    let errorMsg = "Failed to verify phone";
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody?.message) {
+        errorMsg = errorBody.message;
+      }
+    } catch {}
+
+    throw new Error(errorMsg);
+  }
+
   return response.json();
 };

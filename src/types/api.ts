@@ -1,5 +1,5 @@
 type UserRole = "super_admin" | "admin" | "teacher" | "parent";
-type Plan = "standard" | "pro" | "enterprise";
+type Plan = "standard" | "pro" | "enterprise" | "custom";
 type SchoolLevel = "primary" | "o_level" | "a_level" | "combined";
 export interface LoginDto {
   email: string;
