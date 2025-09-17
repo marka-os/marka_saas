@@ -47,7 +47,7 @@ export function useAuth() {
     error: apiError,
     refetch: refetchUser,
   } = useQuery({
-    queryKey: ["/api/v1/auth/profile"],
+    queryKey: ["api/v1/auth/profile"],
     queryFn: getQueryFn<User>({ on401: "returnNull" }),
     retry: false,
     enabled: !!token && zustandAuthenticated && isRehydrated, // Only fetch if we have a token AND store is rehydrated
@@ -113,6 +113,6 @@ export function useAuth() {
     login: loginWithTokens,
     refetchUser,
     hasToken: !!token,
-    isRehydrated, // For debugging
+    isRehydrated, 
   };
 }
