@@ -20,6 +20,7 @@ import { Input } from "@marka/components/ui/input";
 import { Checkbox } from "@marka/components/ui/checkbox";
 import { useToast } from "@marka/hooks/use-toast";
 import { login } from "@marka/lib/api";
+import { useAuthStore } from "@marka/stores/auth-store";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -33,6 +34,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const { login: zustandLogin } = useAuthStore();
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -46,6 +48,7 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
+      zustandLogin(data.accessToken, data.user);
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
