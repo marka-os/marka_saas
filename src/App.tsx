@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@marka/components/ui/toaster";
 import { TooltipProvider } from "@marka/components/ui/tooltip";
-import { useAuth } from "./hooks/use-auth";
+import { AuthGuard } from "@marka/components/AuthGuard";
 
 // Page imports
 import Landing from "./pages/landing";
@@ -22,41 +22,92 @@ import { useEffect } from "react";
 import VerificationPage from "./pages/verificationPage";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center space-x-2">
-          <div className="loading-spinner w-8 h-8"></div>
-          <span className="text-muted-foreground">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Route path="/verify" component={VerificationPage} />
-          {/* <Route component={Landing} /> */}
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/students" component={Students} />
-          <Route path="/schools" component={Schools} />
-          <Route path="/subjects" component={Subjects} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/analytics" component={Analytics} />
-          <Route component={NotFound} />
-        </>
-      )}
+      {/* Public routes, redirect authenticated users to dashboard */}
+      <Route
+        path="/"
+        component={() => (
+          <AuthGuard requireAuth={false}>
+            <Landing />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/login"
+        component={() => (
+          <AuthGuard requireAuth={false}>
+            <Login />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/register"
+        component={() => (
+          <AuthGuard requireAuth={false}>
+            <Register />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/verify"
+        component={() => (
+          <AuthGuard requireAuth={false}>
+            <VerificationPage />
+          </AuthGuard>
+        )}
+      />
+
+      {/* Private routes, require authentication */}
+      <Route
+        path="/dashboard"
+        component={() => (
+          <AuthGuard>
+            <Dashboard />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/students"
+        component={() => (
+          <AuthGuard>
+            <Students />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/schools"
+        component={() => (
+          <AuthGuard>
+            <Schools />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/subjects"
+        component={() => (
+          <AuthGuard>
+            <Subjects />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/reports"
+        component={() => (
+          <AuthGuard>
+            <Reports />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/analytics"
+        component={() => (
+          <AuthGuard>
+            <Analytics />
+          </AuthGuard>
+        )}
+      />
+      <Route component={NotFound} />
     </Switch>
   );
 }

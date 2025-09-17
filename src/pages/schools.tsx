@@ -38,6 +38,7 @@ export default function Schools() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
 
   const {
     data: schoolsData,

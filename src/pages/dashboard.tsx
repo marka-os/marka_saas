@@ -19,7 +19,9 @@ import { Button } from "@marka/components/ui/button";
 import { Badge } from "@marka/components/ui/badge";
 import { Link } from "wouter";
 
+
 export default function Dashboard() {
+ 
   // Mock data for now - in real app this would come from API
   const statsData = {
     totalStudents: 1247,
