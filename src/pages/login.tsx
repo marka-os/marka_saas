@@ -35,7 +35,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
-  const { login: LoginUser, isAuthenticated } = useAuth();
+  const { login: loginUser, isAuthenticated, isHydrated } = useAuth();
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -55,10 +55,21 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: (data: LoginResponse) => {
-      LoginUser(data.accessToken, data.user);
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Store tokens in localStorage (redundant with TokenService but keeps existing pattern)
+      //localStorage.setItem("accessToken", data.accessToken);
+      //localStorage.setItem("refreshToken", data.refreshToken);
+      //localStorage.setItem("user", JSON.stringify(data.user));
+      
+      // Update auth store
+      loginUser(data.accessToken, data.user);
+      
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in to your account.",
+      });
+      
+      // Navigate to dashboard
+      setLocation("/dashboard");
     },
     onError: (error: unknown) => {
       let message = "Please check your credentials and try again.";
@@ -73,15 +84,16 @@ export default function Login() {
     },
   });
 
+  // Redirect if already authenticated and hydrated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isHydrated && isAuthenticated) {
       toast({
         title: "Welcome back!",
-        description: "You have successfully signed in to your account.",
+        description: "You are already signed in.",
       });
       setLocation("/dashboard");
     }
-  }, [isAuthenticated, setLocation, toast]);
+  }, [isAuthenticated, isHydrated, setLocation, toast]);
 
   const onSubmit = (data: LoginForm) => {
     loginMutation.mutate({
@@ -89,6 +101,15 @@ export default function Login() {
       password: data.password,
     });
   };
+
+  // Show loading while hydrating
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading-spinner w-8 h-8"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">

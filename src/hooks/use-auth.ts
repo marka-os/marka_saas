@@ -13,34 +13,15 @@ export function useAuth() {
   const {
     user,
     token,
-    isAuthenticated: zustandAuthenticated,
-    isLoading: zustandLoading,
+    isAuthenticated,
+    isLoading,
+    isHydrated,
     login,
     logout: zustandLogout,
     updateUser,
-    initializeAuth, // Make sure this is included
   } = useAuthStore();
 
-  // State to track if store has been rehydrated from localStorage
-  const [isRehydrated, setIsRehydrated] = React.useState(false);
-
-  // Wait for Zustand to rehydrate from localStorage
-  React.useEffect(() => {
-    const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
-      setIsRehydrated(true);
-      initializeAuth(); // Re-initialize auth after hydration
-    });
-
-    // If already hydrated, set rehydrated to true
-    if (useAuthStore.persist.hasHydrated()) {
-      setIsRehydrated(true);
-      initializeAuth();
-    }
-
-    return unsubscribe;
-  }, [initializeAuth]);
-
-  // Fetch user profile from API (complements zustand storage)
+  // Fetch user profile from API only after hydration and if authenticated
   const {
     data: apiUser,
     isLoading: apiLoading,
@@ -50,19 +31,18 @@ export function useAuth() {
     queryKey: ["api/v1/auth/profile"],
     queryFn: getQueryFn<User>({ on401: "returnNull" }),
     retry: false,
-    enabled: !!token && zustandAuthenticated && isRehydrated, // Only fetch if we have a token AND store is rehydrated
+    enabled: isHydrated && isAuthenticated && !!token,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Sync API user with zustand store
-  const isLoading = !isRehydrated || zustandLoading || apiLoading;
-  const currentUser = apiUser || user;
-  const isAuthenticated =
-    zustandAuthenticated && !!currentUser && !apiError && isRehydrated;
+  // Determine final auth state
+  const finalIsLoading = !isHydrated || isLoading || (isAuthenticated && apiLoading);
+  const finalUser = apiUser || user;
+  const finalIsAuthenticated = isHydrated && isAuthenticated && !apiError;
 
-  // Update zustand store when API user changes
+  // Update zustand store when API user changes - MEMOIZED to prevent infinite loops
   React.useEffect(() => {
-    if (apiUser && apiUser !== user) {
+    if (apiUser && JSON.stringify(apiUser) !== JSON.stringify(user)) {
       updateUser(apiUser);
     }
   }, [apiUser, user, updateUser]);
@@ -71,13 +51,8 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: logoutApi,
     onSuccess: () => {
-      // Clear zustand state
       zustandLogout();
-
-      // Clear react-query cache
       queryClient.clear();
-
-      // Redirect to home
       setLocation("/");
     },
     onError: (error) => {
@@ -89,30 +64,88 @@ export function useAuth() {
     },
   });
 
-  const logout = () => {
+  const logout = React.useCallback(() => {
     logoutMutation.mutate();
-  };
+  }, [logoutMutation]);
 
-  // Login helper function
+  // Login helper function - MEMOIZED to prevent re-renders
   const loginWithTokens = React.useCallback(
     (accessToken: string, userData: User) => {
       login(accessToken, userData);
-      // Refetch user profile to ensure we have latest data
-      refetchUser();
     },
-    [login, refetchUser]
+    [login]
   );
 
-  return {
-    user: currentUser,
-    isLoading,
+  // REMOVE or conditionally log to prevent spam
+  // Only log when auth state actually changes, not on every render
+  const prevAuthState = React.useRef({
+    isHydrated: false,
+    isAuthenticated: false,
+    finalIsAuthenticated: false,
+  });
+
+  React.useEffect(() => {
+    const currentState = {
+      isHydrated,
+      isAuthenticated,
+      finalIsAuthenticated,
+    };
+
+    // Only log if state has actually changed
+    if (
+      currentState.isHydrated !== prevAuthState.current.isHydrated ||
+      currentState.isAuthenticated !== prevAuthState.current.isAuthenticated ||
+      currentState.finalIsAuthenticated !== prevAuthState.current.finalIsAuthenticated
+    ) {
+      console.log("Auth state changed:", {
+        isHydrated,
+        isAuthenticated,
+        hasToken: !!token,
+        hasUser: !!finalUser,
+        apiError: !!apiError,
+        apiLoading,
+        finalIsAuthenticated,
+        finalIsLoading,
+      });
+
+      prevAuthState.current = currentState;
+    }
+  }, [
+    isHydrated,
     isAuthenticated,
-    error: apiError,
-    logout,
-    isLoggingOut: logoutMutation.isPending,
-    login: loginWithTokens,
-    refetchUser,
-    hasToken: !!token,
-    isRehydrated, 
-  };
+    finalIsAuthenticated,
+    token,
+    finalUser,
+    apiError,
+    apiLoading,
+    finalIsLoading,
+  ]);
+
+  // Memoize the return object to prevent unnecessary re-renders
+  return React.useMemo(
+    () => ({
+      user: finalUser,
+      isLoading: finalIsLoading,
+      isAuthenticated: finalIsAuthenticated,
+      error: apiError,
+      logout,
+      isLoggingOut: logoutMutation.isPending,
+      login: loginWithTokens,
+      refetchUser,
+      hasToken: !!token,
+      isHydrated,
+    }),
+    [
+      finalUser,
+      finalIsLoading,
+      finalIsAuthenticated,
+      apiError,
+      logout,
+      logoutMutation.isPending,
+      loginWithTokens,
+      refetchUser,
+      token,
+      isHydrated,
+    ]
+  );
 }

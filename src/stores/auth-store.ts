@@ -16,6 +16,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isHydrated: boolean; // Added hydration tracking
 
   verificationUserId: string | null;
   verificationEmail: string | null;
@@ -28,6 +29,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   initializeAuth: () => void;
   updateUser: (updates: Partial<User>) => void;
+  setHydrated: (hydrated: boolean) => void;
 
   // Verification methods
   setVerificationData: (userId: string, email: string, phone: string) => void;
@@ -45,8 +47,9 @@ export const useAuthStore = create<AuthState>()(
     ((set, get) => ({
       user: null,
       token: null,
-      isLoading: false,
+      isLoading: true, // Start with loading true
       isAuthenticated: false,
+      isHydrated: false,
 
       // Verification state
       verificationUserId: null,
@@ -56,6 +59,7 @@ export const useAuthStore = create<AuthState>()(
       isPhoneVerified: false,
 
       login: (token: string, user: User) => {
+        // Set token in service first
         TokenService.setAuthToken(token);
         TokenService.setStoredUser(user);
 
@@ -74,6 +78,12 @@ export const useAuthStore = create<AuthState>()(
           token: null,
           isLoading: false,
           isAuthenticated: false,
+          // Clear verification data on logout
+          verificationUserId: null,
+          verificationEmail: null,
+          verificationPhone: null,
+          isEmailVerified: false,
+          isPhoneVerified: false,
         });
       },
 
@@ -81,10 +91,24 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading });
       },
 
+      setHydrated: (hydrated: boolean) => {
+        set({ isHydrated: hydrated });
+      },
+
       initializeAuth: () => {
         const token = TokenService.getAuthToken();
         const user = TokenService.getStoredUser<User>();
-        const isAuthenticated = !!token && !TokenService.isTokenExpired(token);
+        
+        // Check if token exists and is not expired
+        const isValidToken = token && !TokenService.isTokenExpired(token);
+        const isAuthenticated = !!(isValidToken && user);
+
+        console.log('Auth initialization:', {
+          hasToken: !!token,
+          hasUser: !!user,
+          isValidToken,
+          isAuthenticated
+        });
 
         set({
           user,
@@ -102,6 +126,7 @@ export const useAuthStore = create<AuthState>()(
           set({ user: updatedUser });
         }
       },
+
       // Verification methods
       setVerificationData: (userId: string, email: string, phone: string) => {
         set({
@@ -183,11 +208,14 @@ export const useAuthStore = create<AuthState>()(
         isPhoneVerified: state.isPhoneVerified,
       }),
       onRehydrateStorage: () => (state) => {
-        state?.initializeAuth();
+        if (state) {
+          state.setHydrated(true);
+          state.initializeAuth();
+        }
       },
     }
   )
 );
 
-//Initialize auth on store creation
-useAuthStore.getState().initializeAuth();
+// Don't initialize immediately - let hydration handle it
+// useAuthStore.getState().initializeAuth();
