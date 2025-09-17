@@ -16,6 +16,17 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading, isHydrated } = useAuth();
 
+  // Debug log for authentication state
+  React.useEffect(() => {
+    console.log("[AuthGuard] State:", {
+      requireAuth,
+      isAuthenticated,
+      isLoading,
+      isHydrated,
+      redirectTo,
+    });
+  }, [requireAuth, isAuthenticated, isLoading, isHydrated, redirectTo]);
+
   // Redirect logic using useEffect at top level
   React.useEffect(() => {
     if (requireAuth && !isAuthenticated && isHydrated && !isLoading) {
@@ -30,7 +41,14 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [requireAuth, isAuthenticated, isHydrated, isLoading, redirectTo, setLocation]);
+  }, [
+    requireAuth,
+    isAuthenticated,
+    isHydrated,
+    isLoading,
+    redirectTo,
+    setLocation,
+  ]);
 
   // Show loading spinner while hydrating or loading
   if (!isHydrated || isLoading) {
