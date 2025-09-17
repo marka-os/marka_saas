@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -35,7 +35,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
-  const { login: LoginUser } = useAuth();
+  const { login: LoginUser, isAuthenticated } = useAuth();
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -59,13 +59,6 @@ export default function Login() {
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
-
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in to your account.",
-      });
-
-      setLocation("/dashboard");
     },
     onError: (error: unknown) => {
       let message = "Please check your credentials and try again.";
@@ -79,6 +72,16 @@ export default function Login() {
       });
     },
   });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in to your account.",
+      });
+      setLocation("/dashboard");
+    }
+  }, [isAuthenticated, setLocation, toast]);
 
   const onSubmit = (data: LoginForm) => {
     loginMutation.mutate({
