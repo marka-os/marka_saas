@@ -175,7 +175,6 @@ export default function Landing() {
           </div>
         </div>
       </nav>
-
       {/* Hero */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div
@@ -209,7 +208,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Features */}
       <section id="features" className="py-20 bg-muted/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -241,7 +239,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Stats */}
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -253,7 +250,6 @@ export default function Landing() {
           ))}
         </div>
       </section>
-
       {/* Schools Showcase */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto text-center">
@@ -275,16 +271,157 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-card border-t py-12">
-        <div className="max-w-7xl mx-auto text-center text-muted-foreground">
-          <p>
-            &copy; 2025 Marka OS. All rights reserved. Built for Uganda’s
-            schools.
-          </p>
-        </div>
-      </footer>
+      {/* Footer */}{" "}
+      <footer className="bg-card border-t border-border py-12">
+        {" "}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {" "}
+          <div className="grid md:grid-cols-4 gap-8">
+            {" "}
+            <div>
+              {" "}
+              <div className="flex items-center space-x-2 mb-4">
+                {" "}
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  {" "}
+                  <GraduationCap className="w-5 h-5 text-primary-foreground" />{" "}
+                </div>{" "}
+                <span className="font-bold text-foreground">Marka</span>{" "}
+              </div>{" "}
+              <p className="text-muted-foreground mb-4">
+                {" "}
+                Transforming education in Uganda with modern, UNEB-compliant
+                report card generation.{" "}
+              </p>{" "}
+            </div>{" "}
+            <div>
+              {" "}
+              <h4 className="font-semibold text-foreground mb-4">
+                Product
+              </h4>{" "}
+              <ul className="space-y-2 text-muted-foreground">
+                {" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#features"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    Features{" "}
+                  </a>{" "}
+                </li>{" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#pricing"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    Pricing{" "}
+                  </a>{" "}
+                </li>{" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#api"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    API Docs{" "}
+                  </a>{" "}
+                </li>{" "}
+              </ul>{" "}
+            </div>{" "}
+            <div>
+              {" "}
+              <h4 className="font-semibold text-foreground mb-4">
+                Support
+              </h4>{" "}
+              <ul className="space-y-2 text-muted-foreground">
+                {" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#help"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    Help Center{" "}
+                  </a>{" "}
+                </li>{" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#contact"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    Contact Us{" "}
+                  </a>{" "}
+                </li>{" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#training"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    Training{" "}
+                  </a>{" "}
+                </li>{" "}
+              </ul>{" "}
+            </div>{" "}
+            <div>
+              {" "}
+              <h4 className="font-semibold text-foreground mb-4">
+                Company
+              </h4>{" "}
+              <ul className="space-y-2 text-muted-foreground">
+                {" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#about"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    About{" "}
+                  </a>{" "}
+                </li>{" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#privacy"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    Privacy{" "}
+                  </a>{" "}
+                </li>{" "}
+                <li>
+                  {" "}
+                  <a
+                    href="#terms"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {" "}
+                    Terms{" "}
+                  </a>{" "}
+                </li>{" "}
+              </ul>{" "}
+            </div>{" "}
+          </div>{" "}
+          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+            {" "}
+            <p>
+              {" "}
+              &copy; {new Date().getFullYear()} Marka OS. All rights reserved.
+              Built for Uganda's educational excellence.{" "}
+            </p>{" "}
+          </div>{" "}
+        </div>{" "}
+      </footer>{" "}
     </div>
   );
 }
