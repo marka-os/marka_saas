@@ -286,7 +286,7 @@ export default function Landing() {
                   {" "}
                   <GraduationCap className="w-5 h-5 text-primary-foreground" />{" "}
                 </div>{" "}
-                <span className="font-bold text-foreground">Marka</span>{" "}
+                <span className="font-bold text-foreground">Marka OS</span>{" "}
               </div>{" "}
               <p className="text-muted-foreground mb-4">
                 {" "}
