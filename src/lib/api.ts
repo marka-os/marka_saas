@@ -6,7 +6,7 @@ import {
   InsertStudent,
   InsertAssessment,
   UpdateAssessment,
-  // UpdateStudent,
+  UpdateStudent,
   //UpdateSchool,
 } from "@marka/types/api";
 
@@ -82,10 +82,10 @@ export async function createStudent(student: InsertStudent) {
   return response.json();
 }
 
-//export async function updateStudent(id: string, updates: UpdateStudent) {
-//  const response = await apiRequest("PATCH", `/api/v1/students/${id}`, updates);
-//return response.json();
-//}
+export async function updateStudent(id: string, updates: UpdateStudent) {
+  const response = await apiRequest("PATCH", `/api/v1/students/${id}`, updates);
+  return response.json();
+}
 
 export async function deleteStudent(id: string) {
   const response = await apiRequest("DELETE", `/api/v1/students/${id}`);
@@ -152,15 +152,15 @@ export async function getSubjects(examLevel: string) {
   return response.json();
 }
 
-//export async function createSubject(subject: any) {
-//  const response = await apiRequest("POST", "/api/v1/subjects", subject);
-//  return response.json();
-//}
+export async function createSubject(subject: any) {
+  const response = await apiRequest("POST", "/api/v1/subjects", subject);
+  return response.json();
+}
 
-//export async function updateSubject(id: string, updates: any) {
-//const response = await apiRequest("PATCH", `/api/v1/subjects/${id}`, updates);
-//  return response.json();
-//}
+export async function updateSubject(id: string, updates: any) {
+  const response = await apiRequest("PATCH", `/api/v1/subjects/${id}`, updates);
+  return response.json();
+}
 
 export async function deleteSubject(id: string) {
   const response = await apiRequest("DELETE", `/api/v1/subjects/${id}`);
@@ -208,3 +208,81 @@ export async function calculateGrade(score: number, examLevel: string) {
   );
   return response.json();
 }
+
+export const verifyEmail = async (
+  userId: string,
+  code: string,
+  email: string
+) => {
+  const response = await apiRequest("POST", `/api/v1/auth/verify/email`, {
+    userId,
+    code,
+    email,
+  });
+  if (!response.ok) {
+    let errorMsg = "Failed to verify phone";
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody?.message) {
+        errorMsg = errorBody.message;
+      }
+    } catch {}
+
+    throw new Error(errorMsg);
+  }
+
+  return response.json();
+};
+
+export const verifyPhone = async (
+  userId: string,
+  code: string,
+  phone: string
+) => {
+  const response = await apiRequest("POST", `/api/v1/auth/verify/phone`, {
+    userId,
+    code,
+    phone,
+  });
+  if (!response.ok) {
+    let errorMsg = "Failed to verify phone";
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody?.message) {
+        errorMsg = errorBody.message;
+      }
+    } catch {}
+
+    throw new Error(errorMsg);
+  }
+
+  return response.json();
+};
+
+export const resendVerificationCode = async (
+  userId: string,
+  type: string,
+  target: string
+) => {
+  const response = await apiRequest("POST", `/api/v1/auth/verify/resend`, {
+    userId,
+    type,
+    target,
+  });
+  if (!response.ok) {
+    let errorMsg = "Failed to verify phone";
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody?.message) {
+        errorMsg = errorBody.message;
+      }
+    } catch {}
+
+    throw new Error(errorMsg);
+  }
+
+  return response.json();
+};

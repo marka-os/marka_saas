@@ -23,7 +23,7 @@ import { StudentForm } from "@marka/components/forms/student-form";
 import { LoadingSpinner } from "@marka/components/ui/loading-spinner";
 import { EmptyState } from "@marka/components/ui/empty-state";
 import { useToast } from "@marka/hooks/use-toast";
-import { getStudents, createStudent, deleteStudent } from "@marka/lib/api";
+import { getStudents, createStudent, deleteStudent, updateStudent } from "@marka/lib/api";
 import { Student } from "@marka/types/api";
 
 export default function Students() {
@@ -147,7 +147,7 @@ export default function Students() {
       const matchesClass =
         classFilter === "all" || student.class === classFilter;
       const matchesStream =
-        streamFilter === "all" || student.strem === streamFilter;
+        streamFilter === "all" || student.stream === streamFilter;
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "active" && student.status === "active") ||

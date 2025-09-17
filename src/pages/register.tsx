@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, GraduationCap, ArrowLeft } from "lucide-react";
+import { parsePhoneNumber } from "libphonenumber-js";
 
 import { Button } from "@marka/components/ui/button";
 import { Card, CardContent } from "@marka/components/ui/card";
@@ -27,12 +28,28 @@ import {
 import { Checkbox } from "@marka/components/ui/checkbox";
 import { useToast } from "@marka/hooks/use-toast";
 import { register as registerApi } from "@marka/lib/api";
+import { PlanModal } from "@marka/components/modals/PlansModal";
+import { useAuthStore } from "@marka/stores/auth-store";
 
 const registerSchema = z
   .object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Please enter a valid email address"),
+    phone: z
+      .string()
+      .min(1, { message: "Phone number is required" })
+      .refine(
+        (value) => {
+          try {
+            const phoneNumber = parsePhoneNumber(value, "UG");
+            return phoneNumber.isValid();
+          } catch {
+            return false;
+          }
+        },
+        { message: "Invalid phone number" }
+      ),
     role: z.enum(["admin", "teacher"], {
       required_error: "Please select a role",
     }),
@@ -44,6 +61,7 @@ const registerSchema = z
         (val) => val === true,
         "You must accept the terms and conditions"
       ),
+    plan: z.enum(["standard", "pro", "enterprise", "custom"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -57,6 +75,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
+  const { setVerificationData } = useAuthStore();
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -64,7 +83,9 @@ export default function Register() {
       firstName: "",
       lastName: "",
       email: "",
+      phone: "",
       role: undefined,
+      plan: undefined,
       password: "",
       confirmPassword: "",
       terms: false,
@@ -73,12 +94,21 @@ export default function Register() {
 
   const registerMutation = useMutation({
     mutationFn: registerApi,
-    onSuccess: () => {
-      toast({
-        title: "Account created successfully!",
-        description: "You can now sign in with your new account.",
-      });
-      setLocation("/login");
+    onSuccess: (response) => {
+      // Store verification data
+      const verificationData = {
+        userId: response.user.id,
+        email: response.user.email,
+        phone: response.user.phone,
+      };
+      setVerificationData(
+        verificationData.userId,
+        verificationData.email,
+        verificationData.phone
+      );
+
+      // Redirect to verification page
+      setLocation("/verify");
     },
     onError: (error: unknown) => {
       let message = "Something went wrong. Please try again.";
@@ -103,8 +133,10 @@ export default function Register() {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
+      phone: data.phone,
       password: data.password,
       role: data.role,
+      plan: data.plan,
     });
   };
 
@@ -218,6 +250,25 @@ export default function Register() {
 
                   <FormField
                     control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            placeholder="+256700000000"
+                            data-testid="phone-input"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="role"
                     render={({ field }) => (
                       <FormItem>
@@ -238,6 +289,18 @@ export default function Register() {
                             <SelectItem value="teacher">Teacher</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="plan"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Plan</FormLabel>
+                        <PlanModal />
                         <FormMessage />
                       </FormItem>
                     )}

@@ -62,6 +62,7 @@
     "framer-motion": "^11.13.1",
     "input-otp": "^1.4.2",
     "jsonwebtoken": "^9.0.2",
+    "libphonenumber-js": "^1.12.15",
     "lucide-react": "^0.453.0",
     "memoizee": "^0.4.17",
     "memorystore": "^1.6.7",
@@ -84,7 +85,8 @@
     "ws": "^8.18.0",
     "zod": "^3.24.2",
     "zod-validation-error": "^3.4.0",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "zustand-persist": "^0.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -113,5 +115,9 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2"
+  },
+  "resolutions": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

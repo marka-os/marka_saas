@@ -1,5 +1,5 @@
 type UserRole = "super_admin" | "admin" | "teacher" | "parent";
-type Plan = "standard" | "pro" | "enterprise";
+type Plan = "standard" | "pro" | "enterprise" | "custom";
 type SchoolLevel = "primary" | "o_level" | "a_level" | "combined";
 export interface LoginDto {
   email: string;
@@ -8,11 +8,12 @@ export interface LoginDto {
 
 export interface RegisterDto {
   email: string;
+  phone: string;
   password: string;
   firstName: string;
   lastName: string;
-  role?: UserRole;
-  plan?: Plan;
+  role: UserRole;
+  plan: Plan;
 }
 
 export interface User {
@@ -115,7 +116,7 @@ export interface InsertStudent {
   admissionDate?: string;
 }
 
-//export interface UpdateStudent extends Partial<InsertStudent> {}
+export interface UpdateStudent extends Partial<InsertStudent> {}
 
 // Teacher type (User with teacher role)
 export interface Teacher extends User {

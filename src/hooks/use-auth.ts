@@ -18,7 +18,27 @@ export function useAuth() {
     login,
     logout: zustandLogout,
     updateUser,
+    initializeAuth, // Make sure this is included
   } = useAuthStore();
+
+  // State to track if store has been rehydrated from localStorage
+  const [isRehydrated, setIsRehydrated] = React.useState(false);
+
+  // Wait for Zustand to rehydrate from localStorage
+  React.useEffect(() => {
+    const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
+      setIsRehydrated(true);
+      initializeAuth(); // Re-initialize auth after hydration
+    });
+
+    // If already hydrated, set rehydrated to true
+    if (useAuthStore.persist.hasHydrated()) {
+      setIsRehydrated(true);
+      initializeAuth();
+    }
+
+    return unsubscribe;
+  }, [initializeAuth]);
 
   // Fetch user profile from API (complements zustand storage)
   const {
@@ -30,14 +50,15 @@ export function useAuth() {
     queryKey: ["/api/v1/auth/profile"],
     queryFn: getQueryFn<User>({ on401: "returnNull" }),
     retry: false,
-    enabled: !!token && zustandAuthenticated, // Only fetch if we have a token
+    enabled: !!token && zustandAuthenticated && isRehydrated, // Only fetch if we have a token AND store is rehydrated
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Sync API user with zustand store
-  const isLoading = zustandLoading || apiLoading;
+  const isLoading = !isRehydrated || zustandLoading || apiLoading;
   const currentUser = apiUser || user;
-  const isAuthenticated = zustandAuthenticated && !!currentUser && !apiError;
+  const isAuthenticated =
+    zustandAuthenticated && !!currentUser && !apiError && isRehydrated;
 
   // Update zustand store when API user changes
   React.useEffect(() => {
@@ -92,5 +113,6 @@ export function useAuth() {
     login: loginWithTokens,
     refetchUser,
     hasToken: !!token,
+    isRehydrated, // For debugging
   };
 }

@@ -2,9 +2,27 @@ import { useState } from "react";
 import { Plus, FileText, Download, Share, Eye, Calendar } from "lucide-react";
 import { DashboardLayout } from "@marka/components/layout/dashboard-layout";
 import { Button } from "@marka/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@marka/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@marka/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@marka/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@marka/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@marka/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@marka/components/ui/card";
 import { Badge } from "@marka/components/ui/badge";
 import { StatsCard } from "@marka/components/ui/stats-card";
 import { LoadingSpinner } from "@marka/components/ui/loading-spinner";
@@ -49,7 +67,7 @@ export default function Reports() {
       },
       {
         id: "2",
-        studentId: "student-2", 
+        studentId: "student-2",
         studentName: "David Okello",
         className: "P.6B",
         term: "Term 1",
@@ -64,39 +82,48 @@ export default function Reports() {
         studentId: "student-3",
         studentName: "Grace Achieng",
         className: "P.7A",
-        term: "Term 1", 
+        term: "Term 1",
         academicYear: "2025",
         generatedDate: "2025-03-13",
         status: "processing" as const,
         subjects: 8,
         averageScore: 0,
-      }
-    ] as ReportCard[]
+      },
+    ] as ReportCard[],
   };
 
   // Filter reports
   const filteredReports = reportsData.reports.filter((report) => {
-    const matchesClass = classFilter === "all" || report.className.includes(classFilter);
+    const matchesClass =
+      classFilter === "all" || report.className.includes(classFilter);
     const matchesTerm = termFilter === "all" || report.term === termFilter;
-    const matchesStatus = statusFilter === "all" || report.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || report.status === statusFilter;
 
     return matchesClass && matchesTerm && matchesStatus;
   });
 
   // Calculate stats
   const totalReports = reportsData.reports.length;
-  const generatedReports = reportsData.reports.filter(r => r.status === "generated").length;
-  const processingReports = reportsData.reports.filter(r => r.status === "processing").length;
-  const averageScore = reportsData.reports
-    .filter(r => r.status === "generated")
-    .reduce((sum, r) => sum + r.averageScore, 0) / generatedReports || 0;
+  const generatedReports = reportsData.reports.filter(
+    (r) => r.status === "generated"
+  ).length;
+  const processingReports = reportsData.reports.filter(
+    (r) => r.status === "processing"
+  ).length;
+  const averageScore =
+    reportsData.reports
+      .filter((r) => r.status === "generated")
+      .reduce((sum, r) => sum + r.averageScore, 0) / generatedReports || 0;
 
   const handleGenerateReport = (data: any) => {
     toast({
       title: "Report generation started",
-      description: "Your report cards are being generated. This may take a few minutes.",
+      description:
+        "Your report cards are being generated. This may take a few minutes.",
     });
     setIsGenerateDialogOpen(false);
+    console.log(data);
   };
 
   const handleDownload = (reportId: string) => {
@@ -104,6 +131,7 @@ export default function Reports() {
       title: "Download started",
       description: "Your report card is being downloaded as PDF.",
     });
+    console.log(reportId);
   };
 
   const handleShare = (reportId: string) => {
@@ -111,6 +139,7 @@ export default function Reports() {
       title: "Share link copied",
       description: "The shareable link has been copied to your clipboard.",
     });
+    console.log(reportId);
   };
 
   const reportTypes = [
@@ -140,14 +169,22 @@ export default function Reports() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Report Card Generation</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              Report Card Generation
+            </h1>
             <p className="text-muted-foreground">
               Generate UNEB-compliant report cards for students
             </p>
           </div>
-          <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
+          <Dialog
+            open={isGenerateDialogOpen}
+            onOpenChange={setIsGenerateDialogOpen}
+          >
             <DialogTrigger asChild>
-              <Button className="mt-4 sm:mt-0" data-testid="generate-reports-button">
+              <Button
+                className="mt-4 sm:mt-0"
+                data-testid="generate-reports-button"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Generate Reports
               </Button>
@@ -198,12 +235,20 @@ export default function Reports() {
 
         {/* Report Types */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Report Generation Options</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            Report Generation Options
+          </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {reportTypes.map((type, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setIsGenerateDialogOpen(true)}>
+              <Card
+                key={index}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => setIsGenerateDialogOpen(true)}
+              >
                 <CardHeader className="pb-3">
-                  <div className={`w-12 h-12 rounded-lg ${type.color} flex items-center justify-center mb-3`}>
+                  <div
+                    className={`w-12 h-12 rounded-lg ${type.color} flex items-center justify-center mb-3`}
+                  >
                     <type.icon className="w-6 h-6 text-white" />
                   </div>
                   <CardTitle className="text-lg">{type.title}</CardTitle>
@@ -271,20 +316,37 @@ export default function Reports() {
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Student</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Class</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Term</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Generated</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Actions</th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                        Student
+                      </th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                        Class
+                      </th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                        Term
+                      </th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                        Generated
+                      </th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                        Status
+                      </th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {filteredReports.map((report) => (
-                      <tr key={report.id} className="hover:bg-muted/50 transition-colors">
+                      <tr
+                        key={report.id}
+                        className="hover:bg-muted/50 transition-colors"
+                      >
                         <td className="p-4">
                           <div>
-                            <div className="font-medium text-foreground">{report.studentName}</div>
+                            <div className="font-medium text-foreground">
+                              {report.studentName}
+                            </div>
                             {report.status === "generated" && (
                               <div className="text-sm text-muted-foreground">
                                 Average: {report.averageScore.toFixed(1)}%
@@ -295,19 +357,27 @@ export default function Reports() {
                         <td className="p-4">
                           <Badge variant="outline">{report.className}</Badge>
                         </td>
-                        <td className="p-4 text-foreground">{report.term}, {report.academicYear}</td>
+                        <td className="p-4 text-foreground">
+                          {report.term}, {report.academicYear}
+                        </td>
                         <td className="p-4 text-muted-foreground">
                           {new Date(report.generatedDate).toLocaleDateString()}
                         </td>
                         <td className="p-4">
-                          <Badge 
+                          <Badge
                             variant={
-                              report.status === "generated" ? "default" : 
-                              report.status === "processing" ? "secondary" : "destructive"
+                              report.status === "generated"
+                                ? "default"
+                                : report.status === "processing"
+                                ? "secondary"
+                                : "destructive"
                             }
                           >
-                            {report.status === "generated" ? "Generated" : 
-                             report.status === "processing" ? "Processing" : "Failed"}
+                            {report.status === "generated"
+                              ? "Generated"
+                              : report.status === "processing"
+                              ? "Processing"
+                              : "Failed"}
                           </Badge>
                         </td>
                         <td className="p-4">
@@ -343,7 +413,9 @@ export default function Reports() {
                             {report.status === "processing" && (
                               <div className="flex items-center">
                                 <LoadingSpinner size="sm" className="mr-2" />
-                                <span className="text-sm text-muted-foreground">Processing...</span>
+                                <span className="text-sm text-muted-foreground">
+                                  Processing...
+                                </span>
                               </div>
                             )}
                             {report.status === "failed" && (
@@ -370,12 +442,16 @@ export default function Reports() {
             icon={FileText}
             title="No reports found"
             description={
-              classFilter !== "all" || termFilter !== "all" || statusFilter !== "all"
+              classFilter !== "all" ||
+              termFilter !== "all" ||
+              statusFilter !== "all"
                 ? "No reports match your current filters. Try adjusting your search criteria."
                 : "No report cards have been generated yet. Start by generating your first report."
             }
             action={
-              classFilter === "all" && termFilter === "all" && statusFilter === "all"
+              classFilter === "all" &&
+              termFilter === "all" &&
+              statusFilter === "all"
                 ? {
                     label: "Generate First Report",
                     onClick: () => setIsGenerateDialogOpen(true),
@@ -395,7 +471,11 @@ interface GenerateReportFormProps {
   isSubmitting?: boolean;
 }
 
-function GenerateReportForm({ onSubmit, onCancel, isSubmitting }: GenerateReportFormProps) {
+function GenerateReportForm({
+  onSubmit,
+  onCancel,
+  isSubmitting,
+}: GenerateReportFormProps) {
   const [formData, setFormData] = useState({
     reportType: "",
     academicTerm: "",
@@ -415,9 +495,11 @@ function GenerateReportForm({ onSubmit, onCancel, isSubmitting }: GenerateReport
         <label className="block text-sm font-medium text-foreground mb-2">
           Report Type *
         </label>
-        <Select 
-          value={formData.reportType} 
-          onValueChange={(value) => setFormData({ ...formData, reportType: value })}
+        <Select
+          value={formData.reportType}
+          onValueChange={(value) =>
+            setFormData({ ...formData, reportType: value })
+          }
         >
           <SelectTrigger data-testid="report-type">
             <SelectValue placeholder="Select report type" />
@@ -435,9 +517,11 @@ function GenerateReportForm({ onSubmit, onCancel, isSubmitting }: GenerateReport
         <label className="block text-sm font-medium text-foreground mb-2">
           Academic Term *
         </label>
-        <Select 
-          value={formData.academicTerm} 
-          onValueChange={(value) => setFormData({ ...formData, academicTerm: value })}
+        <Select
+          value={formData.academicTerm}
+          onValueChange={(value) =>
+            setFormData({ ...formData, academicTerm: value })
+          }
         >
           <SelectTrigger data-testid="academic-term">
             <SelectValue placeholder="Select term" />
@@ -454,9 +538,11 @@ function GenerateReportForm({ onSubmit, onCancel, isSubmitting }: GenerateReport
         <label className="block text-sm font-medium text-foreground mb-2">
           Class Level *
         </label>
-        <Select 
-          value={formData.classLevel} 
-          onValueChange={(value) => setFormData({ ...formData, classLevel: value })}
+        <Select
+          value={formData.classLevel}
+          onValueChange={(value) =>
+            setFormData({ ...formData, classLevel: value })
+          }
         >
           <SelectTrigger data-testid="class-level">
             <SelectValue placeholder="Select class" />
@@ -474,8 +560,8 @@ function GenerateReportForm({ onSubmit, onCancel, isSubmitting }: GenerateReport
         <label className="block text-sm font-medium text-foreground mb-2">
           Stream (Optional)
         </label>
-        <Select 
-          value={formData.stream} 
+        <Select
+          value={formData.stream}
           onValueChange={(value) => setFormData({ ...formData, stream: value })}
         >
           <SelectTrigger data-testid="stream">
@@ -494,28 +580,36 @@ function GenerateReportForm({ onSubmit, onCancel, isSubmitting }: GenerateReport
         <div className="flex items-start space-x-3">
           <Calendar className="w-5 h-5 text-primary mt-0.5" />
           <div className="text-sm">
-            <p className="text-foreground font-medium mb-1">UNEB Compliance Notice</p>
+            <p className="text-foreground font-medium mb-1">
+              UNEB Compliance Notice
+            </p>
             <p className="text-muted-foreground">
-              Reports will be generated according to Uganda National Examinations Board standards 
-              and will include all required academic assessments and grading criteria.
+              Reports will be generated according to Uganda National
+              Examinations Board standards and will include all required
+              academic assessments and grading criteria.
             </p>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end space-x-4 pt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
           data-testid="cancel-button"
         >
           Cancel
         </Button>
-        <Button 
-          type="submit" 
-          disabled={isSubmitting || !formData.reportType || !formData.academicTerm || !formData.classLevel}
+        <Button
+          type="submit"
+          disabled={
+            isSubmitting ||
+            !formData.reportType ||
+            !formData.academicTerm ||
+            !formData.classLevel
+          }
           data-testid="submit-button"
         >
           {isSubmitting ? (

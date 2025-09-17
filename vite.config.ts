@@ -5,20 +5,16 @@ import { resolve } from "path";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
- server: {
-    host: '0.0.0.0',
-    port: 5173,
-    hmr: {
-      // Use the Codespaces URL for WebSocket connection
-      clientPort: process.env.CODESPACE_NAME ? 443 : 5173,
-      host: process.env.CODESPACE_NAME 
-        ? `${process.env.CODESPACE_NAME}-5173.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`
-        : 'localhost'
-    }
+  server: {
+    allowedHosts: [
+      "5173-kasimlyee-markasaas-c7oscy880wj.ws-eu121.gitpod.io", // Specific Gitpod host
+    ],
+    host: true, // Listen on all network interfaces
+    port: 5173, // Default Vite port
+    strictPort: true, // Fail if port is in use
   },
-  define: {
-    // Fix for some build issues in Codespaces
-    global: 'globalThis',
+  optimizeDeps: {
+    include: ["react", "react-dom", "react/jsx-runtime"],
   },
   resolve: {
     alias: {
@@ -34,5 +30,6 @@ export default defineConfig({
       "@marka/pages": resolve(__dirname, "./src/pages"),
       "@marka/api": resolve(__dirname, "./src/api"),
     },
+    dedupe: ["react", "react-dom"],
   },
 });

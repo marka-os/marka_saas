@@ -14,9 +14,7 @@ async function throwIfResNotOk(res: Response) {
 }
 
 // Use the deployed API URL from environment variables
-const BASE_URL =
-  import.meta.env.VITE_APP_API_BASE_URL?.replace(/\/$/, "") ||
-  "https://api.marka.codewithlyee.com/api/v1";
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL?.replace(/\/$/, "");
 
 /**
  * Make an API request to the specified URL with the given method and data.
