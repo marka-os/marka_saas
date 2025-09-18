@@ -118,47 +118,73 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
+      // FIXED: Add comparison to prevent unnecessary updates
       updateUser: (updates: Partial<User>) => {
         const { user } = get();
         if (user) {
           const updatedUser = { ...user, ...updates };
-          TokenService.setStoredUser(updatedUser);
-          set({ user: updatedUser });
+          
+          // FIXED: Only update if the user data has actually changed
+          const hasChanged = JSON.stringify(user) !== JSON.stringify(updatedUser);
+          
+          if (hasChanged) {
+            TokenService.setStoredUser(updatedUser);
+            set({ user: updatedUser });
+          }
         }
       },
 
-      // Verification methods
+      // Verification methods - FIXED: Add comparison checks
       setVerificationData: (userId: string, email: string, phone: string) => {
-        set({
-          verificationUserId: userId,
-          verificationEmail: email,
-          verificationPhone: phone,
-          isEmailVerified: false,
-          isPhoneVerified: false,
-        });
+        const current = get();
+        
+        // Only update if values have changed
+        if (
+          current.verificationUserId !== userId ||
+          current.verificationEmail !== email ||
+          current.verificationPhone !== phone
+        ) {
+          set({
+            verificationUserId: userId,
+            verificationEmail: email,
+            verificationPhone: phone,
+            isEmailVerified: false,
+            isPhoneVerified: false,
+          });
+        }
       },
 
       setEmailVerified: (status: boolean) => {
-        set({ isEmailVerified: status });
+        const current = get();
+        
+        // Only update if status has changed
+        if (current.isEmailVerified !== status) {
+          set({ isEmailVerified: status });
 
-        // Also update user if logged in
-        const { user } = get();
-        if (user && status) {
-          const updatedUser = { ...user, isEmailVerified: status };
-          TokenService.setStoredUser(updatedUser);
-          set({ user: updatedUser });
+          // Also update user if logged in
+          const { user } = current;
+          if (user && status) {
+            const updatedUser = { ...user, isEmailVerified: status };
+            TokenService.setStoredUser(updatedUser);
+            set({ user: updatedUser });
+          }
         }
       },
 
       setPhoneVerified: (status: boolean) => {
-        set({ isPhoneVerified: status });
+        const current = get();
+        
+        // Only update if status has changed
+        if (current.isPhoneVerified !== status) {
+          set({ isPhoneVerified: status });
 
-        // Also update user if logged in
-        const { user } = get();
-        if (user && status) {
-          const updatedUser = { ...user, isPhoneVerified: status };
-          TokenService.setStoredUser(updatedUser);
-          set({ user: updatedUser });
+          // Also update user if logged in
+          const { user } = current;
+          if (user && status) {
+            const updatedUser = { ...user, isPhoneVerified: status };
+            TokenService.setStoredUser(updatedUser);
+            set({ user: updatedUser });
+          }
         }
       },
 
@@ -176,21 +202,29 @@ export const useAuthStore = create<AuthState>()(
         emailVerified: boolean,
         phoneVerified: boolean
       ) => {
-        set({
-          isEmailVerified: emailVerified,
-          isPhoneVerified: phoneVerified,
-        });
-
-        // Also update user if logged in
-        const { user } = get();
-        if (user) {
-          const updatedUser = {
-            ...user,
+        const current = get();
+        
+        // Only update if status has changed
+        if (
+          current.isEmailVerified !== emailVerified ||
+          current.isPhoneVerified !== phoneVerified
+        ) {
+          set({
             isEmailVerified: emailVerified,
             isPhoneVerified: phoneVerified,
-          };
-          TokenService.setStoredUser(updatedUser);
-          set({ user: updatedUser });
+          });
+
+          // Also update user if logged in
+          const { user } = current;
+          if (user) {
+            const updatedUser = {
+              ...user,
+              isEmailVerified: emailVerified,
+              isPhoneVerified: phoneVerified,
+            };
+            TokenService.setStoredUser(updatedUser);
+            set({ user: updatedUser });
+          }
         }
       },
     })) as StateCreator<AuthState>,
@@ -210,7 +244,10 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHydrated(true);
-          state.initializeAuth();
+          // FIXED: Add a small delay to prevent immediate initialization conflicts
+          setTimeout(() => {
+            state.initializeAuth();
+          }, 0);
         }
       },
     }

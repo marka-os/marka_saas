@@ -43,12 +43,24 @@ export function useAuth() {
   const finalIsAuthenticated =
     isHydrated && isAuthenticated && (!!finalUser || isInitialMount.current);
 
-  // Update zustand store when API user changes - MEMOIZED to prevent infinite loops
+  // FIXED: Memoize updateUser to prevent it from changing on every render
+  const stableUpdateUser = React.useCallback(updateUser, [updateUser]);
+
+  // FIXED: Use a ref to track the last updated user to prevent infinite loops
+  const lastUpdatedUserRef = React.useRef<string>("");
+
+  // Update zustand store when API user changes - FIXED with better comparison and stability
   React.useEffect(() => {
-    if (apiUser && JSON.stringify(apiUser) !== JSON.stringify(user)) {
-      updateUser(apiUser);
+    if (apiUser) {
+      const currentUserString = JSON.stringify(apiUser);
+      
+      // Only update if the user data has actually changed
+      if (currentUserString !== lastUpdatedUserRef.current) {
+        lastUpdatedUserRef.current = currentUserString;
+        stableUpdateUser(apiUser);
+      }
     }
-  }, [apiUser, user, updateUser]);
+  }, [apiUser, stableUpdateUser]);
 
   // Logout mutation
   const logoutMutation = useMutation({
@@ -79,12 +91,13 @@ export function useAuth() {
     [login]
   );
 
-  // REMOVE or conditionally log to prevent spam
-  // Only log when auth state actually changes, not on every render
+  // FIXED: Only log when auth state actually changes, not on every render
   const prevAuthState = React.useRef({
     isHydrated: false,
     isAuthenticated: false,
     finalIsAuthenticated: false,
+    hasToken: false,
+    hasUser: false,
   });
 
   React.useEffect(() => {
@@ -92,15 +105,17 @@ export function useAuth() {
       isHydrated,
       isAuthenticated,
       finalIsAuthenticated,
+      hasToken: !!token,
+      hasUser: !!finalUser,
     };
 
     // Only log if state has actually changed
-    if (
-      currentState.isHydrated !== prevAuthState.current.isHydrated ||
-      currentState.isAuthenticated !== prevAuthState.current.isAuthenticated ||
-      currentState.finalIsAuthenticated !==
-        prevAuthState.current.finalIsAuthenticated
-    ) {
+    const hasStateChanged = Object.keys(currentState).some(
+      (key) => currentState[key as keyof typeof currentState] !== 
+               prevAuthState.current[key as keyof typeof prevAuthState.current]
+    );
+
+    if (hasStateChanged) {
       console.log("Auth state changed:", {
         isHydrated,
         isAuthenticated,
@@ -109,7 +124,6 @@ export function useAuth() {
         apiError: !!apiError,
         apiLoading,
         finalIsAuthenticated,
-        //  finalIsLoading,
       });
 
       prevAuthState.current = currentState;
@@ -122,7 +136,6 @@ export function useAuth() {
     finalUser,
     apiError,
     apiLoading,
-    //   finalIsLoading,
   ]);
 
   // Update isInitialMount after first render

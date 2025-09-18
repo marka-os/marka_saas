@@ -8,19 +8,31 @@ export function LoadingRoot({ children }: LoadingRootProps) {
   const [stylesLoaded, setStylesLoaded] = React.useState(false);
 
   React.useEffect(() => {
-    // Check if all stylesheets are loaded
-    const styleSheets = document.styleSheets;
     const checkStylesLoaded = () => {
+      const styleSheets = document.styleSheets;
+
       for (let i = 0; i < styleSheets.length; i++) {
         try {
-          // Try to access rules - will throw if stylesheet not loaded
+          // Try to access rules - will throw if cross-origin
           const rules = styleSheets[i].cssRules;
           if (!rules && !styleSheets[i].href?.includes("blob:")) {
             return false;
           }
-        } catch (e) {
-          console.error(e);
-          return false;
+        } catch (_) {
+          // For cross-origin stylesheets, we can't check cssRules
+          // But if the stylesheet element exists, assume it's loaded
+          // Only return false if this seems to be a legitimate loading issue
+          if (
+            styleSheets[i].href !== null &&
+            styleSheets[i].href !== undefined &&
+            !styleSheets[i].href?.includes("blob:")
+          ) {
+            // Cross-origin stylesheet - assume it's loaded if the element exists
+            continue;
+          } else {
+            // Actual loading issue
+            return false;
+          }
         }
       }
       return true;
