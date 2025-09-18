@@ -52,7 +52,6 @@ export interface School {
 }
 
 export interface InsertSchool {
-  tenantId: string;
   name: string;
   code?: string;
   level?: SchoolLevel;
@@ -116,7 +115,6 @@ export interface InsertStudent {
   admissionDate?: string;
 }
 
-export interface UpdateStudent extends Partial<InsertStudent> {}
 
 // Teacher type (User with teacher role)
 export interface Teacher extends User {
