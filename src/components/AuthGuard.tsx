@@ -16,6 +16,16 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading, isHydrated } = useAuth();
 
+  // Track if component is mounted
+  const isMounted = React.useRef(false);
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   // Debug log for authentication state
   React.useEffect(() => {
     console.log("[AuthGuard] State:", {
@@ -24,31 +34,37 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
       isLoading,
       isHydrated,
       redirectTo,
+      mounted: isMounted.current,
     });
   }, [requireAuth, isAuthenticated, isLoading, isHydrated, redirectTo]);
 
-  // Redirect logic using useEffect at top level with debounced redirects
+  // Redirect logic using useEffect
   React.useEffect(() => {
-    // Don't redirect while loading or not hydrated
-    if (!isHydrated || isLoading) {
+    if (!isMounted.current || isLoading) {
       return;
     }
 
-    // Handle protected route access
-    if (requireAuth && !isAuthenticated) {
-      const timer = setTimeout(() => {
-        setLocation(redirectTo);
-      }, 100); // Small delay to prevent flash
-      return () => clearTimeout(timer);
+    let redirectTimer: NodeJS.Timeout | null = null;
+
+    if (requireAuth && !isAuthenticated && !isLoading) {
+      redirectTimer = setTimeout(() => {
+        if (isMounted.current) {
+          setLocation(redirectTo);
+        }
+      }, 50);
+    } else if (!requireAuth && isAuthenticated && !isLoading) {
+      redirectTimer = setTimeout(() => {
+        if (isMounted.current) {
+          setLocation("/dashboard");
+        }
+      }, 50);
     }
 
-    // Handle public route access when authenticated
-    if (!requireAuth && isAuthenticated) {
-      const timer = setTimeout(() => {
-        setLocation("/dashboard");
-      }, 100); // Small delay to prevent flash
-      return () => clearTimeout(timer);
-    }
+    return () => {
+      if (redirectTimer) {
+        clearTimeout(redirectTimer);
+      }
+    };
   }, [
     requireAuth,
     isAuthenticated,

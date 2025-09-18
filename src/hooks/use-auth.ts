@@ -20,6 +20,9 @@ export function useAuth() {
     updateUser,
   } = useAuthStore();
 
+  // Track if this is the initial mount
+  const isInitialMount = React.useRef(true);
+
   // Fetch user profile from API only after hydration and if authenticated
   const {
     data: apiUser,
@@ -29,18 +32,16 @@ export function useAuth() {
   } = useQuery({
     queryKey: ["api/v1/auth/profile"],
     queryFn: getQueryFn<User>({ on401: "returnNull" }),
-    retry: 1,
-    retryDelay: 1000,
+    retry: false,
     enabled: isHydrated && isAuthenticated && !!token,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // Keep cached data for 10 minutes
+    gcTime: Infinity, // Keep cached data until explicitly cleared
   });
 
-  // Determine final auth state - optimized to prevent blank screens
-  const finalIsLoading = !isHydrated;
+  // Determine final auth state
   const finalUser = apiUser || user;
   const finalIsAuthenticated =
-    isHydrated && (isAuthenticated || (!!finalUser && (!apiLoading || !!user)));
+    isHydrated && isAuthenticated && (!!finalUser || isInitialMount.current);
 
   // Update zustand store when API user changes - MEMOIZED to prevent infinite loops
   React.useEffect(() => {
@@ -108,7 +109,7 @@ export function useAuth() {
         apiError: !!apiError,
         apiLoading,
         finalIsAuthenticated,
-        finalIsLoading,
+        //  finalIsLoading,
       });
 
       prevAuthState.current = currentState;
@@ -121,19 +122,25 @@ export function useAuth() {
     finalUser,
     apiError,
     apiLoading,
-    finalIsLoading,
+    //   finalIsLoading,
   ]);
 
-  // Memoize the return object to prevent unnecessary re-renders
-  // Combine all loading states
-  const combinedIsLoading = finalIsLoading || apiLoading;
-  const combinedIsAuthenticated = finalIsAuthenticated && !combinedIsLoading;
+  // Update isInitialMount after first render
+  React.useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    }
+  }, []);
+
+  // Calculate loading state
+  const isLoading =
+    !isHydrated || (isAuthenticated && apiLoading && !finalUser);
 
   return React.useMemo(
     () => ({
       user: finalUser,
-      isLoading: combinedIsLoading,
-      isAuthenticated: combinedIsAuthenticated,
+      isLoading,
+      isAuthenticated: finalIsAuthenticated,
       error: apiError,
       logout,
       isLoggingOut: logoutMutation.isPending,
@@ -144,8 +151,8 @@ export function useAuth() {
     }),
     [
       finalUser,
-      combinedIsLoading,
-      combinedIsAuthenticated,
+      isLoading,
+      finalIsAuthenticated,
       apiError,
       logout,
       logoutMutation.isPending,
