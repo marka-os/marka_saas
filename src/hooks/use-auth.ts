@@ -14,7 +14,6 @@ export function useAuth() {
     user,
     token,
     isAuthenticated,
-    isLoading,
     isHydrated,
     login,
     logout: zustandLogout,
@@ -30,15 +29,18 @@ export function useAuth() {
   } = useQuery({
     queryKey: ["api/v1/auth/profile"],
     queryFn: getQueryFn<User>({ on401: "returnNull" }),
-    retry: false,
+    retry: 1,
+    retryDelay: 1000,
     enabled: isHydrated && isAuthenticated && !!token,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep cached data for 10 minutes
   });
 
-  // Determine final auth state
-  const finalIsLoading = !isHydrated || isLoading || (isAuthenticated && apiLoading);
+  // Determine final auth state - optimized to prevent blank screens
+  const finalIsLoading = !isHydrated;
   const finalUser = apiUser || user;
-  const finalIsAuthenticated = isHydrated && isAuthenticated && !apiError;
+  const finalIsAuthenticated =
+    isHydrated && (isAuthenticated || (!!finalUser && (!apiLoading || !!user)));
 
   // Update zustand store when API user changes - MEMOIZED to prevent infinite loops
   React.useEffect(() => {
@@ -95,7 +97,8 @@ export function useAuth() {
     if (
       currentState.isHydrated !== prevAuthState.current.isHydrated ||
       currentState.isAuthenticated !== prevAuthState.current.isAuthenticated ||
-      currentState.finalIsAuthenticated !== prevAuthState.current.finalIsAuthenticated
+      currentState.finalIsAuthenticated !==
+        prevAuthState.current.finalIsAuthenticated
     ) {
       console.log("Auth state changed:", {
         isHydrated,
@@ -122,11 +125,15 @@ export function useAuth() {
   ]);
 
   // Memoize the return object to prevent unnecessary re-renders
+  // Combine all loading states
+  const combinedIsLoading = finalIsLoading || apiLoading;
+  const combinedIsAuthenticated = finalIsAuthenticated && !combinedIsLoading;
+
   return React.useMemo(
     () => ({
       user: finalUser,
-      isLoading: finalIsLoading,
-      isAuthenticated: finalIsAuthenticated,
+      isLoading: combinedIsLoading,
+      isAuthenticated: combinedIsAuthenticated,
       error: apiError,
       logout,
       isLoggingOut: logoutMutation.isPending,
@@ -137,8 +144,8 @@ export function useAuth() {
     }),
     [
       finalUser,
-      finalIsLoading,
-      finalIsAuthenticated,
+      combinedIsLoading,
+      combinedIsAuthenticated,
       apiError,
       logout,
       logoutMutation.isPending,

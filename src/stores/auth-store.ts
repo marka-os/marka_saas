@@ -47,7 +47,7 @@ export const useAuthStore = create<AuthState>()(
     ((set, get) => ({
       user: null,
       token: null,
-      isLoading: true, // Start with loading true
+      isLoading: false, // Don't start with loading true
       isAuthenticated: false,
       isHydrated: false,
 
@@ -98,16 +98,16 @@ export const useAuthStore = create<AuthState>()(
       initializeAuth: () => {
         const token = TokenService.getAuthToken();
         const user = TokenService.getStoredUser<User>();
-        
+
         // Check if token exists and is not expired
         const isValidToken = token && !TokenService.isTokenExpired(token);
         const isAuthenticated = !!(isValidToken && user);
 
-        console.log('Auth initialization:', {
+        console.log("Auth initialization:", {
           hasToken: !!token,
           hasUser: !!user,
           isValidToken,
-          isAuthenticated
+          isAuthenticated,
         });
 
         set({

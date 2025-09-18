@@ -27,18 +27,26 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     });
   }, [requireAuth, isAuthenticated, isLoading, isHydrated, redirectTo]);
 
-  // Redirect logic using useEffect at top level
+  // Redirect logic using useEffect at top level with debounced redirects
   React.useEffect(() => {
-    if (requireAuth && !isAuthenticated && isHydrated && !isLoading) {
+    // Don't redirect while loading or not hydrated
+    if (!isHydrated || isLoading) {
+      return;
+    }
+
+    // Handle protected route access
+    if (requireAuth && !isAuthenticated) {
       const timer = setTimeout(() => {
         setLocation(redirectTo);
-      }, 0);
+      }, 100); // Small delay to prevent flash
       return () => clearTimeout(timer);
     }
-    if (!requireAuth && isAuthenticated && isHydrated && !isLoading) {
+
+    // Handle public route access when authenticated
+    if (!requireAuth && isAuthenticated) {
       const timer = setTimeout(() => {
         setLocation("/dashboard");
-      }, 0);
+      }, 100); // Small delay to prevent flash
       return () => clearTimeout(timer);
     }
   }, [
@@ -50,13 +58,15 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     setLocation,
   ]);
 
-  // Show loading spinner while hydrating or loading
+  // Only show loading spinner during initial load or when authentication state is changing
   if (!isHydrated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="loading-spinner w-8 h-8 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Authenticating...</p>
+          <p className="text-muted-foreground">
+            {!isHydrated ? "Loading..." : "Checking authentication..."}
+          </p>
         </div>
       </div>
     );
