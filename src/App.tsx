@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@marka/components/ui/toaster";
 import { TooltipProvider } from "@marka/components/ui/tooltip";
 import { AuthGuard } from "@marka/components/AuthGuard";
+import { LoadingRoot } from "@marka/components/ui/loading-root";
 
 // Page imports
 import Landing from "./pages/landing";
@@ -140,10 +141,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-background font-sans antialiased">
-          <Toaster />
-          <Router />
-        </div>
+        <LoadingRoot>
+          <div className="min-h-screen bg-background font-sans antialiased">
+            <Toaster />
+            <Router />
+          </div>
+        </LoadingRoot>
       </TooltipProvider>
     </QueryClientProvider>
   );
