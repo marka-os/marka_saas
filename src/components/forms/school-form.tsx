@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,7 +20,23 @@ import {
   SelectValue,
 } from "@marka/components/ui/select";
 import { Textarea } from "@marka/components/ui/textarea";
-import { School } from "@marka/types/api";
+
+type SchoolLevel = "primary" | "o_level" | "a_level" | "combined";
+
+export interface InsertSchool {
+  name: string;
+  code?: string;
+  level?: SchoolLevel;
+  address?: string;
+  city?: string;
+  district?: string;
+  region?: string;
+  postalCode?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  logoUrl?: string;
+}
 
 const schoolSchema = z.object({
   name: z.string().min(1, "School name is required"),
@@ -34,13 +50,12 @@ const schoolSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   website: z.string().url().optional().or(z.literal("")),
+  logoUrl: z.string().url().optional().or(z.literal("")),
 });
 
-type SchoolFormData = z.infer<typeof schoolSchema>;
-
 interface SchoolFormProps {
-  school?: School;
-  onSubmit: (data: SchoolFormData) => void;
+  school?: InsertSchool;
+  onSubmit: (data: InsertSchool) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -59,7 +74,7 @@ export function SchoolForm({
 }: SchoolFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
 
-  const form = useForm<SchoolFormData>({
+  const form = useForm<InsertSchool>({
     resolver: zodResolver(schoolSchema),
     mode: "onChange",
     defaultValues: {
@@ -74,18 +89,19 @@ export function SchoolForm({
       phone: school?.phone || "",
       email: school?.email || "",
       website: school?.website || "",
+      logoUrl: school?.logoUrl || "",
     },
   });
 
   const handleNext = async () => {
-    let fieldsToValidate: (keyof SchoolFormData)[] = [];
+    let fieldsToValidate: (keyof InsertSchool)[] = [];
 
     if (currentStep === 1) {
       fieldsToValidate = ["name"];
     } else if (currentStep === 2) {
       fieldsToValidate = [];
     } else if (currentStep === 3) {
-      fieldsToValidate = ["email", "website"];
+      fieldsToValidate = ["email", "website", "logoUrl"];
     }
 
     const isValid = await form.trigger(fieldsToValidate);
@@ -98,7 +114,7 @@ export function SchoolForm({
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = (data: SchoolFormData) => {
+  const handleSubmit = (data: InsertSchool) => {
     onSubmit(data);
   };
 
@@ -107,16 +123,16 @@ export function SchoolForm({
       {/* Mobile Step Indicator */}
       <div className="block sm:hidden">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm font-medium text-gray-600">
+          <span className="text-sm font-medium text-muted-foreground">
             Step {currentStep} of {steps.length}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted-foreground">
             {steps[currentStep - 1].title}
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-muted rounded-full h-2">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            className="bg-primary h-2 rounded-full transition-all duration-300 animate-fade-in"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
@@ -129,29 +145,33 @@ export function SchoolForm({
             <div key={step.id} className="flex items-center">
               <div className="flex items-center">
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-medium transition-all ${
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-medium transition-all duration-200 ${
                     currentStep >= step.id
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "border-gray-300 text-gray-500"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                      : "border-border text-muted-foreground hover:border-primary/50"
                   }`}
                 >
                   {step.id}
                 </div>
                 <div className="ml-3">
                   <p
-                    className={`text-sm font-medium ${
-                      currentStep >= step.id ? "text-blue-600" : "text-gray-500"
+                    className={`text-sm font-medium transition-colors ${
+                      currentStep >= step.id
+                        ? "text-primary"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {step.title}
                   </p>
-                  <p className="text-xs text-gray-500">{step.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {step.description}
+                  </p>
                 </div>
               </div>
               {index < steps.length - 1 && (
                 <div
-                  className={`flex-1 h-0.5 mx-4 ${
-                    currentStep > step.id ? "bg-blue-600" : "bg-gray-300"
+                  className={`flex-1 h-0.5 mx-4 transition-colors duration-200 ${
+                    currentStep > step.id ? "bg-primary" : "bg-border"
                   }`}
                 />
               )}
@@ -163,12 +183,12 @@ export function SchoolForm({
   );
 
   const renderStep1 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="text-center sm:text-left">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           Basic Information
         </h2>
-        <p className="text-gray-600 text-sm sm:text-base">
+        <p className="text-muted-foreground text-sm sm:text-base">
           Let's start with the essential details about your school
         </p>
       </div>
@@ -179,13 +199,13 @@ export function SchoolForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
-                School Name <span className="text-red-500">*</span>
+              <FormLabel className="text-sm font-medium text-foreground">
+                School Name <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="Enter school name"
-                  className="w-full h-11 sm:h-12 text-base"
+                  className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                   {...field}
                   data-testid="school-name"
                 />
@@ -200,19 +220,19 @@ export function SchoolForm({
           name="code"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
+              <FormLabel className="text-sm font-medium text-foreground">
                 School Code
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="e.g., SMCK001"
-                  className="w-full h-11 sm:h-12 text-base"
+                  className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                   {...field}
                   data-testid="school-code"
                 />
               </FormControl>
               <FormMessage className="text-xs" />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Optional unique identifier for your school
               </p>
             </FormItem>
@@ -224,13 +244,13 @@ export function SchoolForm({
           name="level"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Education Level
               </FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger
-                    className="w-full h-11 sm:h-12 text-base"
+                    className="w-full h-11 sm:h-12 text-base focus:ring-primary"
                     data-testid="school-level"
                   >
                     <SelectValue placeholder="Select education level" />
@@ -247,17 +267,41 @@ export function SchoolForm({
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="logoUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-foreground">
+                School Logo URL
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="https://example.com/logo.png"
+                  className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
+                  {...field}
+                  data-testid="school-logo"
+                />
+              </FormControl>
+              <FormMessage className="text-xs" />
+              <p className="text-xs text-muted-foreground">
+                URL to your school's logo image (optional)
+              </p>
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );
 
   const renderStep2 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="text-center sm:text-left">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           Location Information
         </h2>
-        <p className="text-gray-600 text-sm sm:text-base">
+        <p className="text-muted-foreground text-sm sm:text-base">
           Where is your school located?
         </p>
       </div>
@@ -268,13 +312,13 @@ export function SchoolForm({
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Street Address
               </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Enter the full street address"
-                  className="w-full min-h-[100px] text-base resize-none"
+                  className="w-full min-h-[100px] text-base resize-none transition-colors duration-200 focus:ring-primary"
                   {...field}
                   data-testid="school-address"
                 />
@@ -290,13 +334,13 @@ export function SchoolForm({
             name="city"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-700">
+                <FormLabel className="text-sm font-medium text-foreground">
                   City/Town
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Kampala"
-                    className="w-full h-11 sm:h-12 text-base"
+                    className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                     {...field}
                     data-testid="school-city"
                   />
@@ -311,13 +355,13 @@ export function SchoolForm({
             name="district"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-700">
+                <FormLabel className="text-sm font-medium text-foreground">
                   District
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Kampala District"
-                    className="w-full h-11 sm:h-12 text-base"
+                    className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                     {...field}
                     data-testid="school-district"
                   />
@@ -334,13 +378,13 @@ export function SchoolForm({
             name="region"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-700">
+                <FormLabel className="text-sm font-medium text-foreground">
                   Region
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Central Region"
-                    className="w-full h-11 sm:h-12 text-base"
+                    className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                     {...field}
                     data-testid="school-region"
                   />
@@ -355,13 +399,13 @@ export function SchoolForm({
             name="postalCode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-700">
+                <FormLabel className="text-sm font-medium text-foreground">
                   Postal Code
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., P.O. Box 1234"
-                    className="w-full h-11 sm:h-12 text-base"
+                    className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                     {...field}
                     data-testid="school-postal"
                   />
@@ -376,12 +420,12 @@ export function SchoolForm({
   );
 
   const renderStep3 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="text-center sm:text-left">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           Contact Information
         </h2>
-        <p className="text-gray-600 text-sm sm:text-base">
+        <p className="text-muted-foreground text-sm sm:text-base">
           How can people reach your school?
         </p>
       </div>
@@ -392,13 +436,13 @@ export function SchoolForm({
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Phone Number
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="+256 700 000 000"
-                  className="w-full h-11 sm:h-12 text-base"
+                  className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                   {...field}
                   data-testid="school-phone"
                 />
@@ -413,14 +457,14 @@ export function SchoolForm({
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Email Address
               </FormLabel>
               <FormControl>
                 <Input
                   type="email"
                   placeholder="contact@school.ug"
-                  className="w-full h-11 sm:h-12 text-base"
+                  className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                   {...field}
                   data-testid="school-email"
                 />
@@ -435,19 +479,19 @@ export function SchoolForm({
           name="website"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
+              <FormLabel className="text-sm font-medium text-foreground">
                 Website
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="https://www.school.ug"
-                  className="w-full h-11 sm:h-12 text-base"
+                  className="w-full h-11 sm:h-12 text-base transition-colors duration-200 focus:ring-primary"
                   {...field}
                   data-testid="school-website"
                 />
               </FormControl>
               <FormMessage className="text-xs" />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 School's official website (optional)
               </p>
             </FormItem>
@@ -471,14 +515,14 @@ export function SchoolForm({
   };
 
   const renderNavigationButtons = () => (
-    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 border-t border-gray-200">
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 border-t border-border">
       {/* Mobile Layout */}
       <div className="block sm:hidden space-y-3">
         {currentStep < 3 ? (
           <Button
             type="button"
             onClick={handleNext}
-            className="w-full h-12 text-base font-medium"
+            className="w-full h-12 text-base font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             data-testid="next-button"
           >
             Continue
@@ -487,12 +531,12 @@ export function SchoolForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 text-base font-medium"
+            className="w-full h-12 text-base font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
             data-testid="submit-button"
           >
             {isSubmitting ? (
               <>
-                <div className="loading-spinner w-4 h-4 mr-2"></div>
+                <div className="animate-spin w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full"></div>
                 {school ? "Updating..." : "Creating..."}
               </>
             ) : school ? (
@@ -509,7 +553,7 @@ export function SchoolForm({
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="flex-1 h-11"
+            className="flex-1 h-11 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
             data-testid="cancel-button"
           >
             Cancel
@@ -520,7 +564,7 @@ export function SchoolForm({
               type="button"
               variant="outline"
               onClick={handlePrevious}
-              className="flex-1 h-11"
+              className="flex-1 h-11 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               data-testid="previous-button"
             >
               Previous
@@ -537,7 +581,7 @@ export function SchoolForm({
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-6 h-11"
+            className="px-6 h-11 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
             data-testid="cancel-button"
           >
             Cancel
@@ -548,7 +592,7 @@ export function SchoolForm({
               type="button"
               variant="outline"
               onClick={handlePrevious}
-              className="px-6 h-11"
+              className="px-6 h-11 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               data-testid="previous-button"
             >
               Previous
@@ -561,7 +605,7 @@ export function SchoolForm({
             <Button
               type="button"
               onClick={handleNext}
-              className="px-6 h-11"
+              className="px-6 h-11 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               data-testid="next-button"
             >
               Continue
@@ -570,12 +614,12 @@ export function SchoolForm({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 h-11"
+              className="px-6 h-11 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
               data-testid="submit-button"
             >
               {isSubmitting ? (
                 <>
-                  <div className="loading-spinner w-4 h-4 mr-2"></div>
+                  <div className="animate-spin w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full"></div>
                   {school ? "Updating..." : "Creating..."}
                 </>
               ) : school ? (
