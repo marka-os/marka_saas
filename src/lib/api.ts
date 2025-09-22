@@ -6,7 +6,7 @@ import {
   InsertStudent,
   InsertAssessment,
   UpdateAssessment,
-  UpdateStudent,
+  //UpdateStudent,
   //UpdateSchool,
 } from "@marka/types/api";
 
@@ -82,7 +82,10 @@ export async function createStudent(student: InsertStudent) {
   return response.json();
 }
 
-export async function updateStudent(id: string, updates: UpdateStudent) {
+export async function updateStudent(
+  id: string,
+  updates: Partial<InsertStudent>
+) {
   const response = await apiRequest("PATCH", `/api/v1/students/${id}`, updates);
   return response.json();
 }
@@ -133,7 +136,7 @@ export async function createSchool(school: InsertSchool) {
   return response.json();
 }
 
-export async function updateSchool(id: string, updates: any) {
+export async function updateSchool(id: string, updates: Partial<InsertSchool>) {
   const response = await apiRequest("PATCH", `/api/v1/schools/${id}`, updates);
   return response.json();
 }
