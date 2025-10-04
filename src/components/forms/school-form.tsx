@@ -635,9 +635,9 @@ export function SchoolForm({
   );
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 max-h-[80vh] overflow-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 ">
           {renderStepIndicator()}
 
           <div className="min-h-[400px] sm:min-h-[500px]">
