@@ -28,11 +28,11 @@ const studentSchema = z.object({
   lin: z.string().optional(),
   gender: z.enum(["male", "female", "other"]).optional(),
   dateOfBirth: z.string().optional(),
-  currentClass: z.string().min(1, "Class is required"),
-  currentStream: z.string().min(1, "Stream is required"),
-  parentGuardianName: z.string().optional(),
-  parentGuardianPhone: z.string().optional(),
-  parentGuardianEmail: z.string().email().optional().or(z.literal("")),
+  class: z.string().min(1, "Class is required"),
+  stream: z.string().min(1, "Stream is required"),
+  parentName: z.string().optional(),
+  parentPhone: z.string().optional(),
+  parentEmail: z.string().email().optional().or(z.literal("")),
   address: z.string().optional(),
   admissionNumber: z.string().optional(),
   admissionDate: z.string().optional(),
@@ -64,11 +64,11 @@ export function StudentForm({
       dateOfBirth: student?.dateOfBirth
         ? new Date(student.dateOfBirth).toISOString().split("T")[0]
         : "",
-      currentClass: student?.class || "",
-      currentStream: student?.stream || "",
-      parentGuardianName: student?.parentName || "",
-      parentGuardianPhone: student?.parentPhone || "",
-      parentGuardianEmail: student?.parentEmail || "",
+      class: student?.class || "",
+      stream: student?.stream || "",
+      parentName: student?.parentName || "",
+      parentPhone: student?.parentPhone || "",
+      parentEmail: student?.parentEmail || "",
       address: student?.address || "",
       // admissionNumber: student?.admissionNumber || "",
       admissionDate: student?.admissionDate
@@ -211,7 +211,7 @@ export function StudentForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="currentClass"
+              name="class"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Class *</FormLabel>
@@ -238,7 +238,7 @@ export function StudentForm({
 
             <FormField
               control={form.control}
-              name="currentStream"
+              name="stream"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Stream *</FormLabel>
@@ -305,7 +305,7 @@ export function StudentForm({
 
           <FormField
             control={form.control}
-            name="parentGuardianName"
+            name="parentName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Parent/Guardian Name</FormLabel>
@@ -324,7 +324,7 @@ export function StudentForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="parentGuardianPhone"
+              name="parentPhone"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
@@ -342,7 +342,7 @@ export function StudentForm({
 
             <FormField
               control={form.control}
-              name="parentGuardianEmail"
+              name="parentEmail"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
