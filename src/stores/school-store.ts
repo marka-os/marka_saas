@@ -30,8 +30,23 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await getSchools();
-      // Only one school per tenant
-      const school = response.schools?.[0] || null;
+      console.log("Fetch school response:", response);
+
+      // Handle different response structures
+      let school = null;
+
+      // Backend returns direct array: [{id: "...", name: "...", ...}]
+      if (Array.isArray(response)) {
+        school = response[0] || null;
+      } else if (response.schools && Array.isArray(response.schools)) {
+        school = response.schools[0] || null;
+      } else if (response.data && Array.isArray(response.data)) {
+        school = response.data[0] || null;
+      } else if (response.school) {
+        school = response.school;
+      }
+
+      console.log("Parsed school:", school);
       set({ school, isLoading: false });
     } catch (error: any) {
       console.error("Failed to fetch school:", error);
@@ -57,12 +72,28 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await createSchool(data);
+      console.log("Create school response:", response);
+
+      // Handle different response structures
+      const newSchool = response.school || response.data || response;
+
       set({
-        school: response.school,
+        school: newSchool,
         isLoading: false,
       });
     } catch (error: any) {
       console.error("Failed to create school:", error);
+
+      // Handle 409 conflict specifically
+      if (error.response?.status === 409 || error.statusCode === 409) {
+        // School already exists, try to fetch it
+        try {
+          await get().fetchSchool();
+        } catch (fetchError) {
+          console.error("Failed to fetch existing school:", fetchError);
+        }
+      }
+
       set({
         error: error.message || "Failed to create school",
         isLoading: false,
@@ -83,8 +114,13 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await updateSchool(school.id, data);
+      console.log("Update school response:", response);
+
+      // Handle different response structures
+      const updatedSchool = response.school || response.data || response;
+
       set({
-        school: response.school,
+        school: updatedSchool,
         isLoading: false,
       });
     } catch (error: any) {

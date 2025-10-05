@@ -143,7 +143,19 @@ export async function updateSchool(id: string, updates: Partial<InsertSchool>) {
 
 export async function deleteSchool(id: string) {
   const response = await apiRequest("DELETE", `/api/v1/schools/${id}`);
-  return response.json();
+
+  // Backend returns empty response on successful delete
+  if (response.status === 204 || response.status === 200) {
+    return { success: true };
+  }
+
+  // Only try to parse JSON if there's content
+  const text = await response.text();
+  if (text) {
+    return JSON.parse(text);
+  }
+
+  return { success: true };
 }
 
 // Subjects
