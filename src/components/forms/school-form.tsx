@@ -88,7 +88,7 @@ export function SchoolForm({
       postalCode: school?.postalCode || "",
       phone: school?.phone || "",
       email: school?.email || "",
-      website: school?.website || "",
+      website: school?.website || undefined,
       logoUrl: school?.logoUrl || "",
     },
   });
