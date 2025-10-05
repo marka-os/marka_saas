@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Search, Users } from "lucide-react";
 import { DashboardLayout } from "@marka/components/layout/dashboard-layout";
 import { Button } from "@marka/components/ui/button";
 import { Input } from "@marka/components/ui/input";
@@ -12,6 +11,16 @@ import {
   DialogTrigger,
 } from "@marka/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@marka/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -22,141 +31,140 @@ import { StudentsTable } from "@marka/components/tables/students-table";
 import { StudentForm } from "@marka/components/forms/student-form";
 import { LoadingSpinner } from "@marka/components/ui/loading-spinner";
 import { EmptyState } from "@marka/components/ui/empty-state";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@marka/components/ui/alert";
 import { useToast } from "@marka/hooks/use-toast";
-import { getStudents, createStudent, deleteStudent, updateStudent } from "@marka/lib/api";
+import { useStudentStore } from "@marka/stores/student-store";
+import { useSchoolStore } from "@marka/stores/school-store";
 import { Student } from "@marka/types/api";
+import { AlertCircle } from "lucide-react";
 
 export default function Students() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [deletingStudentId, setDeletingStudentId] = useState<string | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [streamFilter, setStreamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  // For now, using a default schoolId - in real app this would come from user context
-  const schoolId = "default-school-id";
+  // Get school from school store
+  const { school } = useSchoolStore();
 
+  // Get students store
   const {
-    data: studentsData,
+    students,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["/api/v1/students", schoolId],
-    queryFn: () => getStudents(schoolId),
-    enabled: !!schoolId,
-  });
+    fetchStudents,
+    createStudentAction,
+    updateStudentAction,
+    deleteStudentAction,
+    clearError,
+  } = useStudentStore();
 
-  const createMutation = useMutation({
-    mutationFn: createStudent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v1/students"] });
+  // Fetch students when school is available
+  useEffect(() => {
+    if (school?.id) {
+      fetchStudents(school.id);
+    }
+  }, [school?.id, fetchStudents]);
+
+  const handleCreateStudent = async (data: any) => {
+    if (!school?.id) {
+      toast({
+        variant: "destructive",
+        title: "No school found",
+        description: "Please create a school first before adding students.",
+      });
+      return;
+    }
+
+    try {
+      await createStudentAction({
+        ...data,
+        schoolId: school.id,
+      });
       setIsCreateDialogOpen(false);
       toast({
         title: "Student created",
         description: "The student has been successfully added to the system.",
       });
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error creating student",
         description: error.message || "Something went wrong. Please try again.",
       });
-    },
-  });
+    }
+  };
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) =>
-      updateStudent(id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v1/students"] });
+  const handleUpdateStudent = async (data: any) => {
+    if (!editingStudent) return;
+
+    try {
+      await updateStudentAction(editingStudent.id, data);
       setEditingStudent(null);
       toast({
         title: "Student updated",
         description: "The student information has been successfully updated.",
       });
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error updating student",
         description: error.message || "Something went wrong. Please try again.",
       });
-    },
-  });
+    }
+  };
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteStudent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v1/students"] });
+  const handleDeleteStudent = async (id: string) => {
+    try {
+      await deleteStudentAction(id);
+      setDeletingStudentId(null);
       toast({
         title: "Student deleted",
         description:
           "The student has been successfully removed from the system.",
       });
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error deleting student",
         description: error.message || "Something went wrong. Please try again.",
       });
-    },
-  });
-
-  const handleCreateStudent = (data: any) => {
-    createMutation.mutate({
-      ...data,
-      schoolId,
-    });
-  };
-
-  const handleUpdateStudent = (data: any) => {
-    if (editingStudent) {
-      updateMutation.mutate({
-        id: editingStudent.id,
-        updates: data,
-      });
-    }
-  };
-
-  const handleDeleteStudent = (id: string) => {
-    if (
-      confirm(
-        "Are you sure you want to delete this student? This action cannot be undone."
-      )
-    ) {
-      deleteMutation.mutate(id);
     }
   };
 
   // Filter students based on search and filters
-  const filteredStudents =
-    studentsData?.students?.filter((student: Student) => {
-      const matchesSearch =
-        !searchQuery ||
-        `${student.firstName} ${student.lastName}`
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        student.lin?.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredStudents = students.filter((student: Student) => {
+    const matchesSearch =
+      !searchQuery ||
+      `${student.firstName} ${student.lastName}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      student.lin?.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesClass =
-        classFilter === "all" || student.class === classFilter;
-      const matchesStream =
-        streamFilter === "all" || student.stream === streamFilter;
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "active" && student.status === "active") ||
-        (statusFilter === "inactive" && !student.status);
+    const matchesClass = classFilter === "all" || student.class === classFilter;
+    const matchesStream =
+      streamFilter === "all" || student.stream === streamFilter;
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && student.status === "active") ||
+      (statusFilter === "inactive" && student.status !== "active");
 
-      return matchesSearch && matchesClass && matchesStream && matchesStatus;
-    }) || [];
+    return matchesSearch && matchesClass && matchesStream && matchesStatus;
+  });
 
-  if (isLoading) {
+  // Show loading state on initial load
+  if (isLoading && students.length === 0) {
     return (
       <DashboardLayout title="Students">
         <div className="flex items-center justify-center h-96">
@@ -166,22 +174,18 @@ export default function Students() {
     );
   }
 
-  if (error) {
+  // Show error if no school exists
+  if (!school) {
     return (
       <DashboardLayout title="Students">
         <div className="p-6">
-          <EmptyState
-            icon={Search}
-            title="Error loading students"
-            description="There was an error loading the student data. Please try again."
-            action={{
-              label: "Retry",
-              onClick: () =>
-                queryClient.invalidateQueries({
-                  queryKey: ["/api/v1/students"],
-                }),
-            }}
-          />
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>No School Found</AlertTitle>
+            <AlertDescription>
+              Please create a school first before managing students.
+            </AlertDescription>
+          </Alert>
         </div>
       </DashboardLayout>
     );
@@ -210,18 +214,37 @@ export default function Students() {
                 Add Student
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Student</DialogTitle>
               </DialogHeader>
               <StudentForm
                 onSubmit={handleCreateStudent}
                 onCancel={() => setIsCreateDialogOpen(false)}
-                isSubmitting={createMutation.isPending}
+                isSubmitting={isLoading}
               />
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearError}
+                className="ml-4"
+              >
+                Dismiss
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Filters */}
         <div className="bg-card border border-border rounded-lg p-4 mb-6">
@@ -275,17 +298,17 @@ export default function Students() {
           </div>
         </div>
 
-        {/* Students Table */}
+        {/* Students Table or Empty State */}
         {filteredStudents.length > 0 ? (
           <StudentsTable
             students={filteredStudents}
             onEdit={setEditingStudent}
-            onDelete={handleDeleteStudent}
-            isLoading={deleteMutation.isPending}
+            onDelete={(id) => setDeletingStudentId(id)}
+            isLoading={isLoading}
           />
         ) : (
           <EmptyState
-            icon={Search}
+            icon={Users}
             title="No students found"
             description={
               searchQuery ||
@@ -314,7 +337,7 @@ export default function Students() {
           open={!!editingStudent}
           onOpenChange={(open) => !open && setEditingStudent(null)}
         >
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Student</DialogTitle>
             </DialogHeader>
@@ -323,11 +346,39 @@ export default function Students() {
                 student={editingStudent}
                 onSubmit={handleUpdateStudent}
                 onCancel={() => setEditingStudent(null)}
-                isSubmitting={updateMutation.isPending}
+                isSubmitting={isLoading}
               />
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
+          open={!!deletingStudentId}
+          onOpenChange={(open) => !open && setDeletingStudentId(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Student?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this
+                student and all associated data including assessments and
+                reports.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  deletingStudentId && handleDeleteStudent(deletingStudentId)
+                }
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isLoading ? "Deleting..." : "Delete Student"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );
