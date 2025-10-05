@@ -5,7 +5,6 @@ import { Toaster } from "@marka/components/ui/toaster";
 import { TooltipProvider } from "@marka/components/ui/tooltip";
 import { AuthGuard } from "@marka/components/AuthGuard";
 import { LoadingRoot } from "@marka/components/ui/loading-root";
-import { SchoolProvider } from "./providers/school-provider";
 
 // Page imports
 import Landing from "./pages/landing";
@@ -145,9 +144,7 @@ function App() {
         <LoadingRoot>
           <div className="min-h-screen bg-background font-sans antialiased">
             <Toaster />
-            <SchoolProvider autoFetch refreshInterval={60000}>
-              * <Router />*{" "}
-            </SchoolProvider>
+            <Router />
           </div>
         </LoadingRoot>
       </TooltipProvider>
