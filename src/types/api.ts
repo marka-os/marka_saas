@@ -99,15 +99,14 @@ export interface InsertStudent {
   placeOfBirth?: string;
   nationality?: string;
   religion?: string;
-  parentGuardianName?: string;
-  parentGuardianPhone?: string;
-  parentGuardianEmail?: string;
+  parentName?: string;
+  parentPhone?: string;
+  parentEmail?: string;
   address?: string;
   //medicalInfo?: any;
   // emergencyContact?: any;
-  currentClass?: string;
-  currentStream?: string;
-  admissionNumber?: string;
+  class?: string;
+  stream?: string;
   admissionDate?: string;
 }
 
