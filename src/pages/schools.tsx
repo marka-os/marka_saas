@@ -56,7 +56,7 @@ export default function Schools() {
       toast({
         title: "School created",
         description: "The school has been successfully added to the system.",
-      }); 
+      });
     },
     onError: (error: any) => {
       toast({
@@ -109,7 +109,6 @@ export default function Schools() {
   const handleCreateSchool = (data: any) => {
     createMutation.mutate({
       ...data,
-      tenantId: "default-tenant-id", // In real app, this would come from user context
     });
   };
 
