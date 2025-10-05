@@ -1,313 +1,577 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import {
   Plus,
-  Search,
   School as SchoolIcon,
   Users,
   FileText,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { DashboardLayout } from "@marka/components/layout/dashboard-layout";
 import { Button } from "@marka/components/ui/button";
-import { Input } from "@marka/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@marka/components/ui/dialog";
-import { SchoolsTable } from "@marka/components/tables/schools-table";
 import { SchoolForm } from "@marka/components/forms/school-form";
 import { StatsCard } from "@marka/components/ui/stats-card";
 import { LoadingSpinner } from "@marka/components/ui/loading-spinner";
 import { EmptyState } from "@marka/components/ui/empty-state";
 import { useToast } from "@marka/hooks/use-toast";
 import {
-  getSchools,
-  createSchool,
-  updateSchool,
-  deleteSchool,
-} from "@marka/lib/api";
-import { School } from "@marka/types/api";
+  useSchool,
+  useSchoolLoading,
+  useSchoolError,
+  useCanCreateSchool,
+} from "@marka/stores/school-store";
+import {
+  useSchoolActions,
+  useSchoolMetadata,
+} from "@marka/hooks/use-school-action";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@marka/components/ui/alert";
+import { Badge } from "@marka/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@marka/components/ui/card";
+import { Separator } from "@marka/components/ui/separator";
+import type { InsertSchool } from "@marka/types/api";
 
 export default function Schools() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingSchool, setEditingSchool] = useState<School | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
+  // Store selectors
+  const school = useSchool();
+  const isLoading = useSchoolLoading();
+  const error = useSchoolError();
+  const canCreateSchool = useCanCreateSchool();
+
+  // Store actions using custom hooks
   const {
-    data: schoolsData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["/api/v1/schools"],
-    queryFn: getSchools,
-  });
+    createSchool,
+    updateSchool,
+    deleteSchool,
+    refreshSchool,
+    initializeSchool,
+  } = useSchoolActions();
 
-  const createMutation = useMutation({
-    mutationFn: createSchool,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v1/schools"] });
-      setIsCreateDialogOpen(false);
-      toast({
-        title: "School created",
-        description: "The school has been successfully added to the system.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Error creating school",
-        description: error.message || "Something went wrong. Please try again.",
-      });
-    },
-  });
+  // Metadata
+  const { isInitialized, syncStatus } = useSchoolMetadata();
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) =>
-      updateSchool(id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v1/schools"] });
-      setEditingSchool(null);
-      toast({
-        title: "School updated",
-        description: "The school information has been successfully updated.",
+  // Initialize store on mount
+  useEffect(() => {
+    if (!isInitialized) {
+      initializeSchool({
+        onError: (err) => {
+          console.error("Failed to initialize school:", err);
+        },
       });
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Error updating school",
-        description: error.message || "Something went wrong. Please try again.",
-      });
-    },
-  });
+    }
+  }, [isInitialized, initializeSchool]);
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteSchool,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v1/schools"] });
-      toast({
-        title: "School deleted",
-        description:
-          "The school has been successfully removed from the system.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Error deleting school",
-        description: error.message || "Something went wrong. Please try again.",
-      });
-    },
-  });
-
-  const handleCreateSchool = (data: any) => {
-    createMutation.mutate({
-      ...data,
+  // Handlers with callbacks
+  const handleCreateSchool = async (data: InsertSchool) => {
+    await createSchool(data, {
+      onSuccess: () => {
+        setIsCreateDialogOpen(false);
+        toast({
+          title: "School created successfully",
+          description: "Your school has been added to the system.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Failed to create school",
+          description:
+            error.message || "Something went wrong. Please try again.",
+        });
+      },
     });
   };
 
-  const handleUpdateSchool = (data: any) => {
-    if (editingSchool) {
-      updateMutation.mutate({
-        id: editingSchool.id,
-        updates: data,
-      });
-    }
+  const handleUpdateSchool = async (data: InsertSchool) => {
+    await updateSchool(data, {
+      onSuccess: () => {
+        setIsEditDialogOpen(false);
+        toast({
+          title: "School updated successfully",
+          description: "Your school information has been updated.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Failed to update school",
+          description:
+            error.message || "Something went wrong. Please try again.",
+        });
+      },
+    });
   };
 
-  const handleDeleteSchool = (id: string) => {
-    if (
-      confirm(
-        "Are you sure you want to delete this school? This action cannot be undone."
-      )
-    ) {
-      deleteMutation.mutate(id);
-    }
+  const handleDeleteSchool = async () => {
+    await deleteSchool({
+      onSuccess: () => {
+        setShowDeleteConfirm(false);
+        toast({
+          title: "School deleted successfully",
+          description: "Your school has been removed from the system.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Failed to delete school",
+          description:
+            error.message || "Something went wrong. Please try again.",
+        });
+      },
+    });
   };
 
-  // Filter schools based on search
-  const filteredSchools =
-    schoolsData?.schools?.filter((school: School) => {
-      const matchesSearch =
-        !searchQuery ||
-        school.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        school.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        school.district?.toLowerCase().includes(searchQuery.toLowerCase());
+  const handleRefresh = async () => {
+    await refreshSchool({
+      onSuccess: () => {
+        toast({
+          title: "Data refreshed",
+          description: "School information has been updated.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Failed to refresh",
+          description: error.message || "Could not refresh data.",
+        });
+      },
+    });
+  };
 
-      return matchesSearch;
-    }) || [];
+  // Calculate mock stats (in production, these would come from the backend)
+  const stats = {
+    totalStudents: school ? 450 : 0,
+    totalTeachers: school ? 32 : 0,
+    totalReports: school ? 1350 : 0,
+    activeClasses: school ? 18 : 0,
+  };
 
-  // Calculate stats (mock data since we don't have student/teacher counts in school data)
-  const totalSchools = schoolsData?.schools?.length || 0;
-  const activeSchools =
-    schoolsData?.schools?.filter((school: School) => school.isActive).length ||
-    0;
-  const totalStudents = totalSchools * 300; // Mock calculation
-  const totalReports = totalStudents * 3; // Mock calculation
-
-  if (isLoading) {
+  // Loading state
+  if (!isInitialized || (isLoading && !school)) {
     return (
-      <DashboardLayout title="Schools">
+      <DashboardLayout title="School Management">
         <div className="flex items-center justify-center h-96">
-          <LoadingSpinner size="lg" />
+          <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-muted-foreground">Loading school data...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
   }
 
-  if (error) {
+  // Error state
+  if (error && !school) {
     return (
-      <DashboardLayout title="Schools">
+      <DashboardLayout title="School Management">
         <div className="p-6">
-          <EmptyState
-            icon={Search}
-            title="Error loading schools"
-            description="There was an error loading the school data. Please try again."
-            action={{
-              label: "Retry",
-              onClick: () =>
-                queryClient.invalidateQueries({
-                  queryKey: ["/api/v1/schools"],
-                }),
-            }}
-          />
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error Loading School Data</AlertTitle>
+            <AlertDescription className="mt-2">
+              {error.message}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                className="mt-4"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Schools">
+    <DashboardLayout title="School Management">
       <div className="p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Schools Management
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              School Management
+              {syncStatus === "pending" && (
+                <Badge variant="outline" className="animate-pulse">
+                  Syncing...
+                </Badge>
+              )}
+              {syncStatus === "error" && (
+                <Badge variant="destructive">Sync Error</Badge>
+              )}
             </h1>
             <p className="text-muted-foreground">
-              Manage school institutions and their configurations
+              {school
+                ? "Manage your school institution and configuration"
+                : "Set up your school to get started"}
             </p>
           </div>
-          <Dialog
-            open={isCreateDialogOpen}
-            onOpenChange={setIsCreateDialogOpen}
-          >
-            <DialogTrigger asChild>
-              <Button className="mt-4 sm:mt-0" data-testid="add-school-button">
-                <Plus className="w-4 h-4 mr-2" />
-                Add School
+          <div className="flex gap-2 mt-4 sm:mt-0">
+            {school && (
+              <Button
+                variant="outline"
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+                Refresh
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle>Add New School</DialogTitle>
-              </DialogHeader>
-              <SchoolForm
-                onSubmit={handleCreateSchool}
-                onCancel={() => setIsCreateDialogOpen(false)}
-                isSubmitting={createMutation.isPending}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <StatsCard
-            title="Total Schools"
-            value={totalSchools}
-            icon={SchoolIcon}
-            data-testid="stats-total-schools"
-          />
-          <StatsCard
-            title="Active Schools"
-            value={activeSchools}
-            icon={SchoolIcon}
-            description="currently operational"
-            data-testid="stats-active-schools"
-          />
-          <StatsCard
-            title="Total Students"
-            value={totalStudents.toLocaleString()}
-            icon={Users}
-            description="across all schools"
-            data-testid="stats-total-students"
-          />
-          <StatsCard
-            title="Reports Generated"
-            value={totalReports.toLocaleString()}
-            icon={FileText}
-            description="this academic year"
-            data-testid="stats-total-reports"
-          />
-        </div>
-
-        {/* Search */}
-        <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search schools..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-              data-testid="search-schools"
-            />
+            )}
+            {canCreateSchool && (
+              <Dialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button className="gap-2" data-testid="add-school-button">
+                    <Plus className="w-4 h-4" />
+                    Create School
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Create Your School</DialogTitle>
+                    <DialogDescription>
+                      Set up your school profile. You can only create one school
+                      per account.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <SchoolForm
+                    onSubmit={handleCreateSchool}
+                    onCancel={() => setIsCreateDialogOpen(false)}
+                    isSubmitting={isLoading}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </div>
 
-        {/* Schools Table */}
-        {filteredSchools.length > 0 ? (
-          <SchoolsTable
-            schools={filteredSchools}
-            onEdit={setEditingSchool}
-            onDelete={handleDeleteSchool}
-            isLoading={deleteMutation.isPending}
-          />
+        {/* Sync Status Alert */}
+        {error && school && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Sync Error</AlertTitle>
+            <AlertDescription>{error.message}</AlertDescription>
+          </Alert>
+        )}
+
+        {school ? (
+          <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <StatsCard
+                title="Total Students"
+                value={stats.totalStudents.toLocaleString()}
+                icon={Users}
+                description="enrolled students"
+                data-testid="stats-total-students"
+              />
+              <StatsCard
+                title="Teaching Staff"
+                value={stats.totalTeachers}
+                icon={Users}
+                description="active teachers"
+                data-testid="stats-total-teachers"
+              />
+              <StatsCard
+                title="Active Classes"
+                value={stats.activeClasses}
+                icon={SchoolIcon}
+                description="running this term"
+                data-testid="stats-active-classes"
+              />
+              <StatsCard
+                title="Reports Generated"
+                value={stats.totalReports.toLocaleString()}
+                icon={FileText}
+                description="this academic year"
+                data-testid="stats-total-reports"
+              />
+            </div>
+
+            {/* School Details Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    {school.logoUrl && (
+                      <img
+                        src={school.logoUrl}
+                        alt={`${school.name} logo`}
+                        className="w-16 h-16 rounded-lg object-cover border"
+                      />
+                    )}
+                    <div>
+                      <CardTitle className="text-2xl">{school.name}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        {school.code && (
+                          <>
+                            <Badge variant="secondary">{school.code}</Badge>
+                            <span className="text-xs">•</span>
+                          </>
+                        )}
+                        {school.level && (
+                          <Badge variant="outline">
+                            {school.level.replace("_", "-").toUpperCase()}
+                          </Badge>
+                        )}
+                        {school.isActive && (
+                          <>
+                            <span className="text-xs">•</span>
+                            <Badge variant="default">Active</Badge>
+                          </>
+                        )}
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditDialogOpen(true)}
+                      data-testid="edit-school-button"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      data-testid="delete-school-button"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Location Information */}
+                  {(school.address ||
+                    school.city ||
+                    school.district ||
+                    school.region) && (
+                    <div>
+                      <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase tracking-wide">
+                        Location
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        {school.address && (
+                          <p className="text-foreground">{school.address}</p>
+                        )}
+                        {(school.city || school.district) && (
+                          <p className="text-muted-foreground">
+                            {[school.city, school.district]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </p>
+                        )}
+                        {school.region && (
+                          <p className="text-muted-foreground">
+                            {school.region}
+                          </p>
+                        )}
+                        {school.postalCode && (
+                          <p className="text-muted-foreground">
+                            {school.postalCode}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact Information */}
+                  {(school.phone || school.email || school.website) && (
+                    <div>
+                      <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase tracking-wide">
+                        Contact
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        {school.phone && (
+                          <div>
+                            <span className="text-muted-foreground">
+                              Phone:{" "}
+                            </span>
+                            <a
+                              href={`tel:${school.phone}`}
+                              className="text-foreground hover:text-primary"
+                            >
+                              {school.phone}
+                            </a>
+                          </div>
+                        )}
+                        {school.email && (
+                          <div>
+                            <span className="text-muted-foreground">
+                              Email:{" "}
+                            </span>
+                            <a
+                              href={`mailto:${school.email}`}
+                              className="text-foreground hover:text-primary"
+                            >
+                              {school.email}
+                            </a>
+                          </div>
+                        )}
+                        {school.website && (
+                          <div>
+                            <span className="text-muted-foreground">
+                              Website:{" "}
+                            </span>
+                            <a
+                              href={school.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-foreground hover:text-primary"
+                            >
+                              {school.website.replace(/^https?:\/\//, "")}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Separator className="my-6" />
+
+                {/* Metadata */}
+                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  {school.createdAt && (
+                    <div>
+                      <span className="font-medium">Created:</span>{" "}
+                      {new Date(school.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </div>
+                  )}
+                  {school.updatedAt && (
+                    <div>
+                      <span className="font-medium">Last Updated:</span>{" "}
+                      {new Date(school.updatedAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </>
         ) : (
-          <EmptyState
-            icon={SchoolIcon}
-            title="No schools found"
-            description={
-              searchQuery
-                ? "No schools match your search criteria. Try adjusting your search."
-                : "No schools have been added yet. Start by adding your first school."
-            }
-            action={
-              !searchQuery
-                ? {
-                    label: "Add First School",
-                    onClick: () => setIsCreateDialogOpen(true),
-                  }
-                : undefined
-            }
-          />
+          /* Empty State - No School Created */
+          <div className="flex items-center justify-center min-h-[500px]">
+            <EmptyState
+              icon={SchoolIcon}
+              title="No School Created"
+              description="You haven't set up your school yet. Create your school profile to get started with the system. You can only create one school per account."
+              action={{
+                label: "Create School",
+                onClick: () => setIsCreateDialogOpen(true),
+              }}
+            />
+          </div>
         )}
 
         {/* Edit School Dialog */}
-        <Dialog
-          open={!!editingSchool}
-          onOpenChange={(open) => !open && setEditingSchool(null)}
-        >
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>Edit School</DialogTitle>
+              <DialogDescription>
+                Update your school's information
+              </DialogDescription>
             </DialogHeader>
-            {editingSchool && (
+            {school && (
               <SchoolForm
-                school={editingSchool}
+                school={school}
                 onSubmit={handleUpdateSchool}
-                onCancel={() => setEditingSchool(null)}
-                isSubmitting={updateMutation.isPending}
+                onCancel={() => setIsEditDialogOpen(false)}
+                isSubmitting={isLoading}
               />
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete School?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete your
+                school and all associated data.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Warning</AlertTitle>
+                <AlertDescription>
+                  All students, assessments, and reports associated with this
+                  school will also be removed.
+                </AlertDescription>
+              </Alert>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteSchool}
+                  disabled={isLoading}
+                  data-testid="confirm-delete-button"
+                >
+                  {isLoading ? (
+                    <>
+                      <LoadingSpinner size="sm" className="mr-2" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete School"
+                  )}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
