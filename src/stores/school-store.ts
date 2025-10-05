@@ -268,7 +268,6 @@ export const useSchoolStore = create<SchoolStore>()(
               state.school = {
                 ...state.school!,
                 ...updates,
-                updatedAt: new Date().toISOString(),
               };
               state.operationInProgress = {
                 type: "update",

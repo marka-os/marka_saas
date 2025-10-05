@@ -33,7 +33,6 @@ export interface User {
 // School types
 export interface School {
   id: string;
-  tenantId: string;
   name: string;
   code?: string;
   level: SchoolLevel;
@@ -46,9 +45,6 @@ export interface School {
   email?: string;
   website?: string;
   logoUrl?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface InsertSchool {
@@ -114,7 +110,6 @@ export interface InsertStudent {
   admissionNumber?: string;
   admissionDate?: string;
 }
-
 
 // Teacher type (User with teacher role)
 export interface Teacher extends User {
