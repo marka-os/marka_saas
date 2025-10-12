@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Users,
   UserCheck,
@@ -18,10 +19,16 @@ import {
 import { Button } from "@marka/components/ui/button";
 import { Badge } from "@marka/components/ui/badge";
 import { Link } from "wouter";
-
+import { useSchoolStore } from "@marka/stores/school-store";
 
 export default function Dashboard() {
- 
+  const { fetchSchool } = useSchoolStore();
+
+  // Fetch school on mount
+  useEffect(() => {
+    fetchSchool();
+  }, [fetchSchool]);
+
   // Mock data for now - in real app this would come from API
   const statsData = {
     totalStudents: 1247,
