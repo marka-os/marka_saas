@@ -59,15 +59,15 @@ export default function Login() {
       //localStorage.setItem("accessToken", data.accessToken);
       //localStorage.setItem("refreshToken", data.refreshToken);
       //localStorage.setItem("user", JSON.stringify(data.user));
-      
+
       // Update auth store
       loginUser(data.accessToken, data.user);
-      
+
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in to your account.",
       });
-      
+
       // Navigate to dashboard
       setLocation("/dashboard");
     },
