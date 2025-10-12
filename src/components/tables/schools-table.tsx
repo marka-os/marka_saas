@@ -158,9 +158,10 @@ export function SchoolsTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={school.isActive ? "default" : "secondary"}>
+                  {/** <Badge variant={school.isActive ? "default" : "secondary"}>
                     {school.isActive ? "Active" : "Inactive"}
-                  </Badge>
+                  </Badge>*/}
+                  <Badge variant="default">Active</Badge>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
