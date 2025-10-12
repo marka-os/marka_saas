@@ -6,12 +6,27 @@ import {
   updateStudent,
   deleteStudent,
   getStudentByLin,
+  downloadStudentTemplate,
+  importStudents,
+  exportStudents,
 } from "@marka/lib/api";
+
+interface ImportResult {
+  total: number;
+  successful: number;
+  failed: number;
+  errors: Array<{
+    row: number;
+    error: string;
+    data: any;
+  }>;
+}
 
 interface StudentState {
   students: Student[];
   isLoading: boolean;
   error: string | null;
+  importResult: ImportResult | null;
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -32,16 +47,27 @@ interface StudentState {
   ) => Promise<void>;
   deleteStudentAction: (id: string) => Promise<void>;
   searchByLin: (lin: string) => Promise<Student | null>;
+
+  // Bulk operations
+  downloadTemplate: (format?: "xlsx" | "csv") => Promise<void>;
+  importStudentsAction: (file: File) => Promise<ImportResult>;
+  exportStudentsAction: (
+    format?: "xlsx" | "csv",
+    schoolId?: string
+  ) => Promise<void>;
+  clearImportResult: () => void;
+
   setError: (error: string | null) => void;
   clearError: () => void;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
 }
 
-export const useStudentStore = create<StudentState>((set) => ({
+export const useStudentStore = create<StudentState>((set, get) => ({
   students: [],
   isLoading: false,
   error: null,
+  importResult: null,
   pagination: {
     currentPage: 1,
     totalPages: 1,
@@ -55,7 +81,6 @@ export const useStudentStore = create<StudentState>((set) => ({
       const response = await getStudents(schoolId);
       console.log("Fetch students response:", response);
 
-      // Handle different response structures
       let students = [];
 
       if (Array.isArray(response)) {
@@ -94,10 +119,8 @@ export const useStudentStore = create<StudentState>((set) => ({
       const response = await createStudent(data);
       console.log("Create student response:", response);
 
-      // Handle different response structures
       const newStudent = response.student || response.data || response;
 
-      // Add to local state
       set((state) => ({
         students: [newStudent, ...state.students],
         pagination: {
@@ -122,10 +145,8 @@ export const useStudentStore = create<StudentState>((set) => ({
       const response = await updateStudent(id, data);
       console.log("Update student response:", response);
 
-      // Handle different response structures
       const updatedStudent = response.student || response.data || response;
 
-      // Update local state
       set((state) => ({
         students: state.students.map((student) =>
           student.id === id ? { ...student, ...updatedStudent } : student
@@ -147,7 +168,6 @@ export const useStudentStore = create<StudentState>((set) => ({
     try {
       await deleteStudent(id);
 
-      // Remove from local state
       set((state) => ({
         students: state.students.filter((student) => student.id !== id),
         pagination: {
@@ -184,6 +204,66 @@ export const useStudentStore = create<StudentState>((set) => ({
       });
       throw error;
     }
+  },
+
+  downloadTemplate: async (format = "xlsx") => {
+    set({ isLoading: true, error: null });
+    try {
+      await downloadStudentTemplate(format);
+      set({ isLoading: false });
+    } catch (error: any) {
+      console.error("Failed to download template:", error);
+      set({
+        error: error.message || "Failed to download template",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  importStudentsAction: async (file: File) => {
+    set({ isLoading: true, error: null, importResult: null });
+    try {
+      const result = await importStudents(file);
+      console.log("Import result:", result);
+
+      set({ importResult: result, isLoading: false });
+
+      // Refresh students list after import
+      const state = get();
+      const schoolId = state.students[0]?.schoolId;
+      if (schoolId) {
+        await get().fetchStudents(schoolId);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error("Failed to import students:", error);
+      set({
+        error: error.message || "Failed to import students",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  exportStudentsAction: async (format = "xlsx", schoolId?: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await exportStudents(format, schoolId);
+      set({ isLoading: false });
+    } catch (error: any) {
+      console.error("Failed to export students:", error);
+      set({
+        error: error.message || "Failed to export students",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  clearImportResult: () => {
+    set({ importResult: null });
   },
 
   setError: (error) => {

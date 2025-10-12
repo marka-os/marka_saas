@@ -101,6 +101,79 @@ export async function getStudentByLin(lin: string) {
 }
 
 /**
+ * Downloads a student import template
+ * @param format The file format (xlsx or csv)
+ */
+export async function downloadStudentTemplate(format: "xlsx" | "csv" = "xlsx") {
+  const response = await apiRequest(
+    "GET",
+    `/api/v1/students/template/download?format=${format}`
+  );
+
+  // Get the blob from response
+  const blob = await response.blob();
+
+  // Create download link
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `students_import_template.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+/**
+ * Imports students from an Excel or CSV file
+ * @param file The file to import
+ * @returns Import result with success/failure counts
+ */
+export async function importStudents(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await apiRequest(
+    "POST",
+    "/api/v1/students/import",
+    formData
+  );
+
+  return response.json();
+}
+
+/**
+ * Exports students to Excel or CSV
+ * @param format The file format (xlsx or csv)
+ * @param schoolId Optional school ID to filter
+ */
+export async function exportStudents(
+  format: "xlsx" | "csv" = "xlsx",
+  schoolId?: string
+) {
+  let url = `/api/v1/students/export?format=${format}`;
+  if (schoolId) {
+    url += `&schoolId=${schoolId}`;
+  }
+
+  const response = await apiRequest("GET", url);
+
+  // Get the blob from response
+  const blob = await response.blob();
+
+  // Create download link
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = downloadUrl;
+  const timestamp = new Date().toISOString().split("T")[0];
+  a.download = `students_export_${timestamp}.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(downloadUrl);
+  document.body.removeChild(a);
+}
+
+/**
 export async function getTeachers() {
   const response = await apiRequest("GET", "/api/v1/users?role=teacher");
   return response.json();

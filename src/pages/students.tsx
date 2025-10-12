@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Search, Users } from "lucide-react";
+import { Plus, Search, Users, Upload, Download } from "lucide-react";
 import { DashboardLayout } from "@marka/components/layout/dashboard-layout";
 import { Button } from "@marka/components/ui/button";
 import { Input } from "@marka/components/ui/input";
@@ -21,6 +21,12 @@ import {
   AlertDialogTitle,
 } from "@marka/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@marka/components/ui/dropdown-menu";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -29,6 +35,7 @@ import {
 } from "@marka/components/ui/select";
 import { StudentsTable } from "@marka/components/tables/students-table";
 import { StudentForm } from "@marka/components/forms/student-form";
+import { BulkImportDialog } from "@marka/components/dialogs/bulk-import-dialog";
 import { LoadingSpinner } from "@marka/components/ui/loading-spinner";
 import { EmptyState } from "@marka/components/ui/empty-state";
 import {
@@ -44,6 +51,7 @@ import { AlertCircle } from "lucide-react";
 
 export default function Students() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [deletingStudentId, setDeletingStudentId] = useState<string | null>(
     null
@@ -67,6 +75,9 @@ export default function Students() {
     createStudentAction,
     updateStudentAction,
     deleteStudentAction,
+    downloadTemplate,
+    importStudentsAction,
+    exportStudentsAction,
     clearError,
   } = useStudentStore();
 
@@ -143,6 +154,68 @@ export default function Students() {
     }
   };
 
+  const handleBulkImport = async (file: File) => {
+    try {
+      const result = await importStudentsAction(file);
+
+      if (result.successful > 0) {
+        toast({
+          title: "Import completed",
+          description: `Successfully imported ${result.successful} of ${result.total} students.`,
+        });
+      }
+
+      if (result.failed > 0) {
+        toast({
+          variant: "destructive",
+          title: "Some imports failed",
+          description: `${result.failed} students could not be imported. Check the error details.`,
+        });
+      }
+
+      return result;
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Import failed",
+        description: error.message || "Failed to import students.",
+      });
+      throw error;
+    }
+  };
+
+  const handleDownloadTemplate = async (format: "xlsx" | "csv") => {
+    try {
+      await downloadTemplate(format);
+      toast({
+        title: "Template downloaded",
+        description: `The ${format.toUpperCase()} template has been downloaded.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: error.message || "Failed to download template.",
+      });
+    }
+  };
+
+  const handleExport = async (format: "xlsx" | "csv") => {
+    try {
+      await exportStudentsAction(format, school?.id);
+      toast({
+        title: "Export successful",
+        description: `Students exported to ${format.toUpperCase()}.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Export failed",
+        description: error.message || "Failed to export students.",
+      });
+    }
+  };
+
   // Filter students based on search and filters
   const filteredStudents = students.filter((student: Student) => {
     const matchesSearch =
@@ -204,27 +277,54 @@ export default function Students() {
               Manage student records, enrollment, and academic information
             </p>
           </div>
-          <Dialog
-            open={isCreateDialogOpen}
-            onOpenChange={setIsCreateDialogOpen}
-          >
-            <DialogTrigger asChild>
-              <Button className="mt-4 sm:mt-0" data-testid="add-student-button">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Student
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Add New Student</DialogTitle>
-              </DialogHeader>
-              <StudentForm
-                onSubmit={handleCreateStudent}
-                onCancel={() => setIsCreateDialogOpen(false)}
-                isSubmitting={isLoading}
-              />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2 mt-4 sm:mt-0">
+            {/* Export Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport("xlsx")}>
+                  Export as Excel (.xlsx)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport("csv")}>
+                  Export as CSV (.csv)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Bulk Import Button */}
+            <Button variant="outline" onClick={() => setIsBulkImportOpen(true)}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import
+            </Button>
+
+            {/* Add Student Button */}
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button data-testid="add-student-button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Student
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Student</DialogTitle>
+                </DialogHeader>
+                <StudentForm
+                  onSubmit={handleCreateStudent}
+                  onCancel={() => setIsCreateDialogOpen(false)}
+                  isSubmitting={isLoading}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Error Alert */}
@@ -331,6 +431,15 @@ export default function Students() {
             }
           />
         )}
+
+        {/* Bulk Import Dialog */}
+        <BulkImportDialog
+          open={isBulkImportOpen}
+          onOpenChange={setIsBulkImportOpen}
+          onImport={handleBulkImport}
+          onDownloadTemplate={handleDownloadTemplate}
+          isLoading={isLoading}
+        />
 
         {/* Edit Student Dialog */}
         <Dialog
