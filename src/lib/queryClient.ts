@@ -35,17 +35,20 @@ export async function apiRequest(
   console.log("Request method:", method);
   console.log("Request data:", data);
 
+  // Check if data is FormData
+  const isFormData = data instanceof FormData;
+
   try {
     const res = await fetch(fullUrl, {
       method,
       headers: {
-        ...(data ? { "Content-Type": "application/json" } : {}),
+        // Only set Content-Type for JSON data, let browser set it for FormData
+        ...(data && !isFormData ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        // Add CORS headers if needed for your deployed API
         Accept: "application/json",
       },
-      body: data ? JSON.stringify(data) : undefined,
-      // Remove credentials: "include" if your API doesn't support it
+      // Handle FormData vs JSON body
+      body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
       mode: "cors",
     });
 
