@@ -21,6 +21,9 @@ import NotFound from "./pages/not-found";
 
 import { useEffect } from "react";
 import VerificationPage from "./pages/verificationPage";
+import About from "./pages/About";
+import Terms from "./pages/terms";
+import Privacy from "./pages/privacy";
 
 function Router() {
   return (
@@ -31,6 +34,30 @@ function Router() {
         component={() => (
           <AuthGuard requireAuth={false}>
             <Landing />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/about"
+        component={() => (
+          <AuthGuard requireAuth={false}>
+            <About />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/terms"
+        component={() => (
+          <AuthGuard requireAuth={false}>
+            <Terms />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/privacy"
+        component={() => (
+          <AuthGuard requireAuth={false}>
+            <Privacy />
           </AuthGuard>
         )}
       />
