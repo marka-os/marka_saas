@@ -265,6 +265,7 @@ export default function Landing() {
               <img
                 key={i}
                 src={img}
+                alt="school images"
                 className="w-full h-48 object-cover rounded-lg shadow-md"
               />
             ))}
