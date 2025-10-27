@@ -6,7 +6,7 @@ import {
   InsertStudent,
   InsertAssessment,
   UpdateAssessment,
-  //UpdateStudent,
+  InsertTeacher,
   //UpdateSchool,
 } from "@marka/types/api";
 
@@ -173,30 +173,178 @@ export async function exportStudents(
   document.body.removeChild(a);
 }
 
+//Teachers
 /**
+ * Gets a list of teachers for a given school.
+ * @returns A list of teachers.
+ */
 export async function getTeachers() {
-  const response = await apiRequest("GET", "/api/v1/users?role=teacher");
+  const response = await apiRequest("GET", `/api/v1/teachers`);
   return response.json();
 }
 
-export async function createTeacher(teacher: any) {
-  const response = await apiRequest("POST", "/api/v1/users", {
-    ...teacher,
-    role: "teacher",
-  });
+/**
+ * Gets a single teacher by ID.
+ * @param id The teacher ID.
+ * @returns The teacher data.
+ */
+export async function getTeacherById(id: string) {
+  const response = await apiRequest("GET", `/api/v1/teachers/${id}`);
   return response.json();
 }
 
-export async function updateTeacher(id: string, updates: any) {
-  const response = await apiRequest("PATCH", `/api/v1/users/${id}`, updates);
+/**
+ * Creates a teacher with the given data.
+ * @param teacher The teacher data.
+ * @returns The created teacher.
+ */
+export async function createTeacher(teacher: InsertTeacher) {
+  const response = await apiRequest("POST", "/api/v1/teachers", teacher);
   return response.json();
 }
 
+/**
+ * Updates a teacher with the given data.
+ * @param id The teacher ID.
+ * @param updates Partial teacher data to update.
+ * @returns The updated teacher.
+ */
+export async function updateTeacher(
+  id: string,
+  updates: Partial<InsertTeacher>
+) {
+  const response = await apiRequest("PATCH", `/api/v1/teachers/${id}`, updates);
+  return response.json();
+}
+
+/**
+ * Deletes a teacher.
+ * @param id The teacher ID.
+ * @returns The deletion response.
+ */
 export async function deleteTeacher(id: string) {
-  const response = await apiRequest("DELETE", `/api/v1/users/${id}`);
+  const response = await apiRequest("DELETE", `/api/v1/teachers/${id}`);
   return response.json();
 }
-  */
+
+/**
+ * Gets a teacher by employee ID.
+ * @param employeeId The employee ID.
+ * @returns The teacher data.
+ */
+export async function getTeacherByEmployeeId(employeeId: string) {
+  const response = await apiRequest(
+    "GET",
+    `/api/v1/teachers/employee/${employeeId}`
+  );
+  return response.json();
+}
+
+/**
+ * Downloads a teacher import template.
+ * @param format The file format (xlsx or csv).
+ */
+export async function downloadTeacherTemplate(format: "xlsx" | "csv" = "xlsx") {
+  const response = await apiRequest(
+    "GET",
+    `/api/v1/teachers/template/download?format=${format}`
+  );
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `teachers_import_template.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+/**
+ * Imports teachers from an Excel or CSV file.
+ * @param file The file to import.
+ * @returns Import result with success/failure counts.
+ */
+export async function importTeachers(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await apiRequest(
+    "POST",
+    "/api/v1/teachers/import",
+    formData
+  );
+
+  return response.json();
+}
+
+/**
+ * Exports teachers to Excel or CSV.
+ * @param format The file format (xlsx or csv).
+ * @param schoolId Optional school ID to filter.
+ */
+export async function exportTeachers(
+  format: "xlsx" | "csv" = "xlsx",
+  schoolId?: string
+) {
+  let url = `/api/v1/teachers/export?format=${format}`;
+  if (schoolId) {
+    url += `&schoolId=${schoolId}`;
+  }
+
+  const response = await apiRequest("GET", url);
+  const blob = await response.blob();
+
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = downloadUrl;
+  const timestamp = new Date().toISOString().split("T")[0];
+  a.download = `teachers_export_${timestamp}.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(downloadUrl);
+  document.body.removeChild(a);
+}
+
+// Staff Attendance APIs
+export async function createStaffAttendance(data: {
+  teacherId: string;
+  date: string;
+  status: "present" | "absent" | "late" | "excused";
+  checkInTime?: string;
+  checkOutTime?: string;
+  notes?: string;
+}) {
+  const response = await apiRequest("POST", "/api/v1/attendance/staff", data);
+  return response.json();
+}
+
+export async function getStaffAttendance(params?: {
+  teacherId?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}) {
+  let url = "/api/v1/attendance/staff";
+  if (params) {
+    const queryParams = new URLSearchParams(
+      Object.entries(params).filter(([_, v]) => v != null) as [string, string][]
+    );
+    url += `?${queryParams.toString()}`;
+  }
+
+  const response = await apiRequest("GET", url);
+  return response.json();
+}
+
+export async function markAttendanceByQR(teacherId: string) {
+  const response = await apiRequest(
+    "POST",
+    `/api/v1/attendance/staff/qr-scan/${teacherId}`
+  );
+  return response.json();
+}
 
 // Schools
 export async function getSchools() {

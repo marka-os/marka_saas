@@ -183,3 +183,98 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export interface Teacher {
+  id: string;
+  schoolId: string;
+  employeeId: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  email: string;
+  phone: string;
+  nationalId?: string;
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  employmentStatus: "active" | "inactive" | "suspended" | "terminated";
+  contractType?: "permanent" | "contract" | "temporary" | "probation";
+  hireDate?: string;
+  contractEndDate?: string;
+  highestQualification?:
+    | "certificate"
+    | "diploma"
+    | "degree"
+    | "masters"
+    | "phd"
+    | "other";
+  qualificationDetails?: string;
+  baseSalary?: number;
+  salaryStructure?: {
+    basic?: number;
+    allowances?: number;
+    deductions?: number;
+  };
+  specializations?: string;
+  yearsOfExperience?: number;
+  documents?: {
+    cv?: {
+      url: string;
+      uploadedAt: string;
+    };
+    certificates?: Array<{
+      url: string;
+      name: string;
+    }>;
+  };
+  settings?: {
+    notifications: boolean;
+    language: string;
+  };
+  notes?: string;
+  subjectIds?: string[];
+  userId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InsertTeacher {
+  employeeId?: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  email: string;
+  phone: string;
+  nationalId?: string;
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  employmentStatus?: "active" | "inactive" | "suspended" | "terminated";
+  contractType?: "permanent" | "contract" | "temporary" | "probation";
+  hireDate?: string;
+  contractEndDate?: string;
+  highestQualification?:
+    | "certificate"
+    | "diploma"
+    | "degree"
+    | "masters"
+    | "phd"
+    | "other";
+  qualificationDetails?: string;
+  baseSalary?: number;
+  salaryStructure?: {
+    basic?: number;
+    allowances?: number;
+    deductions?: number;
+  };
+  specializations?: string;
+  yearsOfExperience?: number;
+  notes?: string;
+  subjectIds?: string[];
+}
