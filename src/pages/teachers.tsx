@@ -137,24 +137,35 @@ export default function Teachers() {
     if (!editingTeacher) return;
 
     try {
-      // Process salary data
       const processedData: UpdateTeacher = {
-        ...data,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        middleName: data.middleName,
+        email: data.email,
+        phone: data.phone,
+        nationalId: data.nationalId,
+        dateOfBirth: data.dateOfBirth,
+        address: data.address,
+        city: data.city,
+        district: data.district,
+        emergencyContact: data.emergencyContact,
+        emergencyPhone: data.emergencyPhone,
+        employmentStatus: data.employmentStatus,
+        contractType: data.contractType,
+        hireDate: data.hireDate,
+        contractEndDate: data.contractEndDate,
+        highestQualification: data.highestQualification,
+        qualificationDetails: data.qualificationDetails,
+        specializations: data.specializations,
+        yearsOfExperience: data.yearsOfExperience ? Number(data.yearsOfExperience) : undefined,
         baseSalary: data.baseSalary ? Number(data.baseSalary) : undefined,
-        yearsOfExperience: data.yearsOfExperience
-          ? Number(data.yearsOfExperience)
-          : undefined,
+        notes: data.notes,
         salaryStructure: {
-          basic: data.salaryStructure?.basic ? Number(data.salaryStructure?.basic) : undefined,
-          allowances: data.salaryStructure?.allowances ? Number(data.salaryStructure?.allowances) : undefined,
-          deductions: data.salaryStructure?.deductions ? Number(data.salaryStructure?.deductions) : undefined, 
+          basic: data.basicSalary ? Number(data.basicSalary) : undefined,
+          allowances: data.allowances ? Number(data.allowances) : undefined,
+          deductions: data.deductions ? Number(data.deductions) : undefined,
         },
       };
-
-      // Remove form-specific fields
-      delete processedData.baseSalary;
-      delete processedData.salaryStructure?.allowances;
-      delete processedData.salaryStructure?.deductions;
 
       await updateTeacherAction(editingTeacher.id, processedData);
       setEditingTeacher(null);
