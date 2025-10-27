@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Teacher, InsertTeacher } from "@marka/types/api";
+import type { Teacher, InsertTeacher, UpdateTeacher } from "@marka/types/api";
 import {
   getTeachers,
   getTeacherById,
@@ -42,7 +42,7 @@ interface TeacherState {
   createTeacherAction: (data: InsertTeacher) => Promise<void>;
   updateTeacherAction: (
     id: string,
-    data: Partial<InsertTeacher>
+    data: UpdateTeacher
   ) => Promise<void>;
   deleteTeacherAction: (id: string) => Promise<void>;
   searchByEmployeeId: (employeeId: string) => Promise<Teacher | null>;

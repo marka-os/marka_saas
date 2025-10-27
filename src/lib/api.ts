@@ -7,6 +7,7 @@ import {
   InsertAssessment,
   UpdateAssessment,
   InsertTeacher,
+  UpdateTeacher
   //UpdateSchool,
 } from "@marka/types/api";
 
@@ -211,7 +212,7 @@ export async function createTeacher(teacher: InsertTeacher) {
  */
 export async function updateTeacher(
   id: string,
-  updates: Partial<InsertTeacher>
+  updates: UpdateTeacher
 ) {
   const response = await apiRequest("PATCH", `/api/v1/teachers/${id}`, updates);
   return response.json();

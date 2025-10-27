@@ -83,6 +83,8 @@ export function TeacherForm({
   onCancel,
   isSubmitting,
 }: TeacherFormProps) {
+  const isEditMode = !!teacher;
+
   const form = useForm<TeacherFormData>({
     resolver: zodResolver(teacherSchema),
     defaultValues: {
@@ -143,9 +145,16 @@ export function TeacherForm({
                     <Input
                       placeholder="Auto-generated if empty"
                       {...field}
+                      disabled={isEditMode} // Disable only when editing
                       data-testid="employee-id"
                     />
                   </FormControl>
+                  <FormDescription>
+                    {isEditMode 
+                      ? "Employee ID cannot be changed" 
+                      : "Leave empty for auto-generation"
+                    }
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -161,9 +170,13 @@ export function TeacherForm({
                     <Input
                       placeholder="CM12345678901234"
                       {...field}
+                      disabled={isEditMode} // Disable only when editing
                       data-testid="national-id"
                     />
                   </FormControl>
+                  <FormDescription>
+                    {isEditMode && "National ID cannot be changed"}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -272,8 +285,16 @@ export function TeacherForm({
               <FormItem>
                 <FormLabel>Date of Birth</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} data-testid="date-of-birth" />
+                  <Input 
+                    type="date" 
+                    {...field} 
+                    disabled={isEditMode} // Disable only when editing
+                    data-testid="date-of-birth" 
+                  />
                 </FormControl>
+                <FormDescription>
+                  {isEditMode && "Date of birth cannot be changed"}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -442,8 +463,16 @@ export function TeacherForm({
                 <FormItem>
                   <FormLabel>Hire Date</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} data-testid="hire-date" />
+                    <Input 
+                      type="date" 
+                      {...field} 
+                      disabled={isEditMode} // Disable only when editing
+                      data-testid="hire-date" 
+                    />
                   </FormControl>
+                  <FormDescription>
+                    {isEditMode && "Hire date cannot be changed"}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -472,7 +501,7 @@ export function TeacherForm({
           </div>
         </div>
 
-        {/* Qualifications */}
+        {/* Qualifications & Experience - All fields remain editable */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Qualifications & Experience</h3>
 
@@ -565,7 +594,7 @@ export function TeacherForm({
           />
         </div>
 
-        {/* Salary Information */}
+        {/* Salary Information - All fields remain editable */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Salary Information</h3>
 
@@ -652,7 +681,7 @@ export function TeacherForm({
           </div>
         </div>
 
-        {/* Additional Notes */}
+        {/* Additional Notes - Remain editable */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Additional Information</h3>
 
@@ -695,9 +724,9 @@ export function TeacherForm({
             {isSubmitting ? (
               <>
                 <div className="loading-spinner w-4 h-4 mr-2"></div>
-                {teacher ? "Updating..." : "Creating..."}
+                {isEditMode ? "Updating..." : "Creating..."}
               </>
-            ) : teacher ? (
+            ) : isEditMode ? (
               "Update Teacher"
             ) : (
               "Create Teacher"
