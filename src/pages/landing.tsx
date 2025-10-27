@@ -93,11 +93,33 @@ export default function Landing() {
     { number: "24/7", label: "Dedicated Support" },
   ];
 
+  // const schoolImages = [
+  //   "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+  //   "https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+  //   "https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+  //   "https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+  // ];
+
   const schoolImages = [
-    "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-    "https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-    "https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-    "https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+    {
+      img: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+      alt: "teacher",
+    },
+    {
+      img: "https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+
+      alt: "children studying",
+    },
+    {
+      img: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+
+      alt: "classroom",
+    },
+    {
+      img: "https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+
+      alt: "happy students",
+    },
   ];
 
   return (
@@ -264,8 +286,8 @@ export default function Landing() {
             {schoolImages.map((img, i) => (
               <img
                 key={i}
-                src={img}
-                alt="school images"
+                src={img.img}
+                alt={img.alt}
                 className="w-full h-48 object-cover rounded-lg shadow-md"
               />
             ))}
