@@ -46,7 +46,7 @@ import {
 import { useToast } from "@marka/hooks/use-toast";
 import { useTeacherStore } from "@marka/stores/teacher-store";
 import { useSchoolStore } from "@marka/stores/school-store";
-import { Teacher } from "@marka/types/api";
+import { Teacher, UpdateTeacher } from "@marka/types/api";
 import { AlertCircle } from "lucide-react";
 
 export default function Teachers() {
@@ -138,23 +138,23 @@ export default function Teachers() {
 
     try {
       // Process salary data
-      const processedData = {
+      const processedData: UpdateTeacher = {
         ...data,
         baseSalary: data.baseSalary ? Number(data.baseSalary) : undefined,
         yearsOfExperience: data.yearsOfExperience
           ? Number(data.yearsOfExperience)
           : undefined,
         salaryStructure: {
-          basic: data.basicSalary ? Number(data.basicSalary) : undefined,
-          allowances: data.allowances ? Number(data.allowances) : undefined,
-          deductions: data.deductions ? Number(data.deductions) : undefined,
+          basic: data.salaryStructure?.basic ? Number(data.salaryStructure?.basic) : undefined,
+          allowances: data.salaryStructure?.allowances ? Number(data.salaryStructure?.allowances) : undefined,
+          deductions: data.salaryStructure?.deductions ? Number(data.salaryStructure?.deductions) : undefined, 
         },
       };
 
       // Remove form-specific fields
-      delete processedData.basicSalary;
-      delete processedData.allowances;
-      delete processedData.deductions;
+      delete processedData.baseSalary;
+      delete processedData.salaryStructure?.allowances;
+      delete processedData.salaryStructure?.deductions;
 
       await updateTeacherAction(editingTeacher.id, processedData);
       setEditingTeacher(null);

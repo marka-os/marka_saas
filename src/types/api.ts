@@ -279,6 +279,4 @@ export interface InsertTeacher {
   subjectIds?: string[];
 }
 
-export interface UpdateTeacher extends Partial<Omit<InsertTeacher, 'employeeId'>> {
-  id: string;
-}
+export interface UpdateTeacher extends Partial<Omit<InsertTeacher, 'employeeId'>> {}
