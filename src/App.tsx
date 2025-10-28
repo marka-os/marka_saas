@@ -12,6 +12,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import Students from "./pages/students";
+import Teachers from "./pages/teachers";
 import Schools from "./pages/schools";
 import Subjects from "./pages/subjects";
 //import Assessments from "./pages/assessments";
@@ -100,6 +101,14 @@ function Router() {
         component={() => (
           <AuthGuard>
             <Students />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/teachers"
+        component={() => (
+          <AuthGuard>
+            <Teachers />
           </AuthGuard>
         )}
       />
