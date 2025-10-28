@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Character Encoding -->
+    <meta charset="UTF-8" />
+
+    <!-- Viewport -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1"
+    />
+
+    <!-- Title -->
+    <title>Marka OS | Schools Operating System for Uganda</title>
+
+    <!-- Primary Meta Tags -->
+    <meta
+      name="description"
+      content="Marka OS is a Schools Operating System and Education ERP that simplifies management for schools in Uganda. From UNEB-compliant report cards to finance, attendance, library, communication, and parent-teacher portals — Marka OS does it all."
+    />
+    <meta
+      name="keywords"
+      content="Marka, Marka OS, UNEB, report cards, Uganda schools, education ERP, digital report card system, school management software, edtech Uganda, teachers portal, parents portal, student management, school finance, attendance system, African education technology"
+    />
+    <meta name="author" content="Kasim Lyee" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://marka.codewithlyee.com/" />
+
+    <!-- Alternate Language (for international SEO scalability) -->
+    <link rel="alternate" href="https://marka.codewithlyee.com/" hreflang="en-ug" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Fonts Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#F7C52D" />
+
+    <!-- Open Graph (Facebook, LinkedIn, WhatsApp) -->
+    <meta property="og:locale" content="en_UG" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Marka OS - UNEB-Compliant Schools Operating System" />
+    <meta
+      property="og:description"
+      content="Digital report cards, student management, attendance, library, finance, communication — Marka OS is a complete Schools Operating System for Uganda and Africa."
+    />
+    <meta property="og:url" content="https://marka.codewithlyee.com/" />
+    <meta
+      property="og:image"
+      content="https://marka.codewithlyee.com/assets/og-image.jpg"
+    />
+    <meta property="og:site_name" content="Marka OS" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@codewithlyee" />
+    <meta name="twitter:site" content="@codewithlyee" />
+    <meta
+      name="twitter:title"
+      content="Marka OS - Schools Operating System"
+    />
+    <meta
+      name="twitter:description"
+      content="Simplify school management with Marka OS — the UNEB-compliant Schools Operating System for Uganda and beyond."
+    />
+    <meta
+      name="twitter:image"
+      content="https://marka.codewithlyee.com/assets/og-image.jpg"
+    />
+
+    <!-- Schema.org JSON-LD (SEO Gold) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Marka OS",
+        "url": "https://marka.codewithlyee.com/",
+        "image": "https://marka.codewithlyee.com/assets/og-image.jpg",
+        "description": "Marka OS is an Schools Operating System designed for schools in Uganda. It manages students, teachers, finance, attendance, UNEB report cards, communication, and more.",
+        "applicationCategory": "Education, School ERP, SaaS",
+        "operatingSystem": "Web, Android, iOS",
+        "softwareVersion": "1.0.0",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "UGX"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Kasim Lyee",
+          "email": "lyee@codewithlyee.com",
+          "url": "https://codewithlyee.com/"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Softlite Inc",
+          "url": "https://softliteinc.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://marka.codewithlyee.com/assets/logo.png"
+          }
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "153"
+        }
+      }
+    </script>
+
+    <!-- Performance & Crawlability Enhancements -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="distribution" content="global" />
+    <meta name="rating" content="general" />
+
+    <!-- Preload critical assets -->
+    <link rel="preload" as="script" href="/src/main.tsx" />
+    <link rel="preload" as="image" href="/assets/og-image.jpg" />
+
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Service Worker -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((registration) => {
+              console.log("SW registered: ", registration);
+              registration.update();
+            })
+            .catch((error) =>
+              console.log("SW registration failed: ", error)
+            );
+        });
+      }
+    </script>
+  </body>
+</html>
