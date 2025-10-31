@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRoute, Link } from 'wouter';
+import { DashboardLayout } from '@marka/components/layout/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@marka/components/ui/card';
 import { Button } from '@marka/components/ui/button';
 import { Badge } from '@marka/components/ui/badge';
@@ -19,17 +20,19 @@ export default function ClassDetailPage() {
 
   if (!classData) {
     return (
-      <div className="container mx-auto p-4 md:p-6 lg:p-8">
-        <Alert>
-          <AlertDescription>Class not found</AlertDescription>
-        </Alert>
-        <Link href="/classes">
-          <Button variant="outline" className="mt-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Classes
-          </Button>
-        </Link>
-      </div>
+      <DashboardLayout title="Class Details">
+        <div className="p-6">
+          <Alert>
+            <AlertDescription>Class not found</AlertDescription>
+          </Alert>
+          <Link href="/classes">
+            <Button variant="outline" className="mt-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Classes
+            </Button>
+          </Link>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -39,7 +42,8 @@ export default function ClassDetailPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+    <DashboardLayout title={classData.name}>
+      <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/classes">
           <Button variant="ghost" size="icon">
@@ -201,6 +205,7 @@ export default function ClassDetailPage() {
         classData={classData}
         streamId={selectedStreamId}
       />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

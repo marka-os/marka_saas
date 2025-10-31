@@ -133,6 +133,12 @@ Comprehensive class and timetable management with the following features:
 - **Adaptive Grid**: Timetable grid scrolls horizontally on mobile
 
 ## Recent Changes
+- **2025-10-31**: Class Management Integration
+  - Added "Classes" to sidebar navigation with FolderKanban icon
+  - Updated all class management pages to use DashboardLayout wrapper
+  - Ensured consistent layout patterns across all pages
+  - All pages follow the same structure as Students, Teachers, and Dashboard
+
 - **2025-10-31**: Class Management System Implementation
   - Created comprehensive class management module with full CRUD operations
   - Implemented Zustand stores for shared state (classes-store, timetable-store)
