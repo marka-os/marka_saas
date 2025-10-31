@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0", // Listen on all network interfaces
     port: 5000, // Replit requires port 5000 for frontend
-    strictPort: false, // Don't fail if port is in use
+    strictPort: true, // Ensure port 5000 is used
   },
   optimizeDeps: {
     include: ["react", "react-dom", "react/jsx-runtime"],
