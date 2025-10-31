@@ -5,10 +5,9 @@ import { Button } from '@marka/components/ui/button';
 import { Badge } from '@marka/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@marka/components/ui/table';
 import { Alert, AlertDescription } from '@marka/components/ui/alert';
-import { ArrowLeft, Plus, Users, UserPlus, Trash2, Calendar } from 'lucide-react';
+import { ArrowLeft, Users, UserPlus, Trash2, Calendar } from 'lucide-react';
 import { useClasses } from '@marka/hooks/use-classes';
 import { AssignTeacherModal } from '@marka/components/modals/AssignTeacherModal';
-import type { Stream } from '@marka/lib/mockData';
 
 export default function ClassDetailPage() {
   const [, params] = useRoute('/classes/:id');

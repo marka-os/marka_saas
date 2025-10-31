@@ -5,7 +5,7 @@ import { Input } from '@marka/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@marka/components/ui/table';
 import { Badge } from '@marka/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@marka/components/ui/alert-dialog';
-import { Plus, Search, Edit, Trash2, Users, Calendar, Eye } from 'lucide-react';
+import { Plus, Search, Trash2, Users, Calendar, Eye } from 'lucide-react';
 import { useClasses } from '@marka/hooks/use-classes';
 import { CreateClassModal } from '@marka/components/modals/CreateClassModal';
 import { AssignTeacherModal } from '@marka/components/modals/AssignTeacherModal';

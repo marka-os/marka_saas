@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useRoute, Link } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@marka/components/ui/card';
 import { Button } from '@marka/components/ui/button';
-import { Badge } from '@marka/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@marka/components/ui/select';
 import { Alert, AlertDescription } from '@marka/components/ui/alert';
 import { ArrowLeft, Plus, Download, Edit, Trash2 } from 'lucide-react';
