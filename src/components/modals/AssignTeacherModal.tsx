@@ -5,7 +5,7 @@ import { Input } from '@marka/components/ui/input';
 import { Label } from '@marka/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@marka/components/ui/select';
 import { useClasses, useTeachers } from '@marka/hooks/use-classes';
-import type { Class, Stream } from '@marka/lib/mockData';
+import type { Class } from '@marka/lib/mockData';
 
 interface AssignTeacherModalProps {
   open: boolean;
