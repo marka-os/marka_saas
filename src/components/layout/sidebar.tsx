@@ -15,6 +15,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  FolderKanban,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -37,6 +38,11 @@ const navigationItems = [
     title: "Teachers",
     href: "/teachers",
     icon: UserCheck,
+  },
+  {
+    title: "Classes",
+    href: "/classes",
+    icon: FolderKanban,
   },
   {
     title: "Schools",

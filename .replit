@@ -4,6 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+packages = ["openssh_gssapi"]
 
 [workflows]
 runButton = "Project"
@@ -36,6 +37,10 @@ externalPort = 80
 [[ports]]
 localPort = 5001
 externalPort = 3001
+
+[[ports]]
+localPort = 41737
+externalPort = 3000
 
 [deployment]
 deploymentTarget = "autoscale"

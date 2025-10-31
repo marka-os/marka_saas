@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRoute, Link } from 'wouter';
+import { DashboardLayout } from '@marka/components/layout/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@marka/components/ui/card';
 import { Button } from '@marka/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@marka/components/ui/select';
@@ -27,17 +28,19 @@ export default function TimetablePage() {
 
   if (!classData) {
     return (
-      <div className="container mx-auto p-4 md:p-6 lg:p-8">
-        <Alert>
-          <AlertDescription>Class not found</AlertDescription>
-        </Alert>
-        <Link href="/classes">
-          <Button variant="outline" className="mt-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Classes
-          </Button>
-        </Link>
-      </div>
+      <DashboardLayout title="Timetable">
+        <div className="p-6">
+          <Alert>
+            <AlertDescription>Class not found</AlertDescription>
+          </Alert>
+          <Link href="/classes">
+            <Button variant="outline" className="mt-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Classes
+            </Button>
+          </Link>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -69,7 +72,8 @@ export default function TimetablePage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+    <DashboardLayout title={`Timetable - ${classData.name}`}>
+      <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <Link href={`/classes/${classData.id}`}>
           <Button variant="ghost" size="icon">
@@ -222,6 +226,7 @@ export default function TimetablePage() {
         defaultDay={defaultDay}
         defaultPeriod={defaultPeriod}
       />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
