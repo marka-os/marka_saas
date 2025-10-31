@@ -6,12 +6,9 @@ import { resolve } from "path";
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: [
-      "5173-kasimlyee-markasaas-c7oscy880wj.ws-eu121.gitpod.io", // Specific Gitpod host
-    ],
-    host: true, // Listen on all network interfaces
-    port: 5173, // Default Vite port
-    strictPort: true, // Fail if port is in use
+    host: "0.0.0.0", // Listen on all network interfaces
+    port: 5000, // Replit requires port 5000 for frontend
+    strictPort: false, // Don't fail if port is in use
   },
   optimizeDeps: {
     include: ["react", "react-dom", "react/jsx-runtime"],
