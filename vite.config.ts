@@ -9,9 +9,9 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5000,
     strictPort: true,
-    allowedHosts: [
-      "6f4e3cc4-c1b8-4e14-a3d1-71f8b40caf9a-00-2wlu63rhzwf21.kirk.replit.dev",
-    ],
+    hmr: {
+      clientPort: 443,
+    },
   },
   optimizeDeps: {
     include: ["react", "react-dom", "react/jsx-runtime"],

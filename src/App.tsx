@@ -17,6 +17,9 @@ import Subjects from "./pages/subjects";
 //import Assessments from "./pages/assessments";
 import Reports from "./pages/reports";
 import Analytics from "./pages/analytics";
+import Classes from "./pages/classes";
+import ClassDetail from "./pages/class-detail";
+import Timetable from "./pages/timetable";
 import NotFound from "./pages/not-found";
 
 import { useEffect } from "react";
@@ -132,6 +135,30 @@ function Router() {
         component={() => (
           <AuthGuard>
             <Analytics />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/classes"
+        component={() => (
+          <AuthGuard>
+            <Classes />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/classes/:id"
+        component={() => (
+          <AuthGuard>
+            <ClassDetail />
+          </AuthGuard>
+        )}
+      />
+      <Route
+        path="/classes/:id/timetable"
+        component={() => (
+          <AuthGuard>
+            <Timetable />
           </AuthGuard>
         )}
       />
