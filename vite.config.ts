@@ -6,9 +6,12 @@ import { resolve } from "path";
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: "0.0.0.0", // Listen on all network interfaces
-    port: 5000, // Replit requires port 5000 for frontend
-    strictPort: true, // Ensure port 5000 is used
+    host: "0.0.0.0",
+    port: 5000,
+    strictPort: true,
+    allowedHosts: [
+      "6f4e3cc4-c1b8-4e14-a3d1-71f8b40caf9a-00-2wlu63rhzwf21.kirk.replit.dev",
+    ],
   },
   optimizeDeps: {
     include: ["react", "react-dom", "react/jsx-runtime"],
